@@ -1,0 +1,72 @@
+.toggleContainer {
+  display: none;
+
+  @media (min-width: 768px) {
+    display: flex;
+    gap: 25px;
+  }
+}
+
+.toggleOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(35, 31, 32, 0.82);
+  cursor: pointer;
+  transition: color 0.3s, border-bottom 0.3s;
+
+  &:hover {
+    color: black;
+  }
+
+  &.active {
+    color: black;
+    border-bottom: 2px solid black;
+  }
+}
+
+.icon {
+  font-size: 1.25rem; // Adjust size as per design
+}
+
+.type {
+  font-size: 0.875rem; // Adjust size for text
+}
+
+.togglePopUp {
+  @extend .toggleContainer;
+  display: none;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 26px 18px 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+
+    .toggleOption {
+      border-radius: 60px;
+      border: 1px solid #0000004d;
+      padding: 6.5px;
+      display: flex;
+      justify-content: center;
+
+      &:first-of-type {
+        width: 55%;
+      }
+      &:last-of-type {
+        width: 45%;
+      }
+
+      &.active {
+        background-color: black;
+        color: white;
+      }
+
+      .type {
+        text-align: center;
+      }
+    }
+  }
+}

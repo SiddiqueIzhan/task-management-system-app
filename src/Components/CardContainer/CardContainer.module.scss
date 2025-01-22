@@ -1,0 +1,326 @@
+// Base styles for the CardContainer
+.display-grid {
+  display: grid;
+  grid-template-columns: 400px 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.parent {
+  width: 100%;
+  position: relative;
+
+  &.hideCard {
+    height: 48px;
+    .listStatus {
+      border-radius: 12px;
+    }
+  }
+
+  &.boardParent {
+    width: 336px;
+  }
+
+  &.todo {
+    .status {
+      background: #fac3ff;
+    }
+    .cardContainer {
+      @media (max-width: 768px) {
+        min-height: 206px;
+      }
+    }
+  }
+
+  &.inProgress .status {
+    background: #85d9f1;
+  }
+
+  &.completed {
+    .status {
+      background: #ceffcc;
+      &.boardStatus {
+        background: #a2d6a0;
+      }
+    }
+    .cardContainer {
+      .check {
+        color: green;
+      }
+      .taskItem {
+        .taskColumn:first-of-type {
+          text-decoration: line-through;
+        }
+      }
+    }
+  }
+}
+
+.cardContainer {
+  width: 100%;
+  background: #f1f1f1;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 48px;
+
+  &.board {
+    width: 336px;
+    min-height: 566px;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+    padding-top: 60px;
+  }
+
+  &.list {
+    width: 100%;
+    min-height: 206px;
+    height: 100%;
+    align-items: center;
+    justify-content: flex-start;
+
+    &.hideList {
+      display: none;
+    }
+  }
+}
+
+// Status styles
+.status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  border-radius: 12px 12px 0px 0px;
+
+  .arrow {
+    transition-duration: 500ms;
+  }
+
+  &.boardStatus {
+    display: inline-block;
+    padding: 4px 10px;
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: 4px;
+    top: 12px;
+    left: 17px;
+
+    .arrow {
+      display: none;
+    }
+  }
+
+  &.listStatus {
+    width: 100%;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+// No tasks message
+.noTasks {
+  margin: auto;
+}
+
+// Task item styles
+.taskItem {
+  width: 100%;
+  min-height: 48px;
+  background: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+  @extend .display-grid;
+  gap: 20px;
+  padding: 10px;
+  position: relative;
+
+  &.boardTask {
+    height: 110px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    padding-bottom: 8px;
+    grid-template-columns: 73% 27%;
+    grid-template-rows: 22px auto 14px;
+    gap: 50px 20px;
+
+    .options {
+      top: 20px;
+      right: 16px;
+    }
+
+    .taskOptions {
+      right: 16px;
+      top: 30px;
+    }
+  }
+}
+
+.options {
+  position: absolute;
+  z-index: 5;
+  right: 24px;
+  top: 18px;
+
+  @media (max-width: 768px) {
+    right: 16px;
+  }
+
+  .hideOptions {
+    display: none;
+  }
+}
+
+.taskOptions {
+  width: 134px;
+  position: absolute;
+  right: 32px;
+  top: 36px;
+  font-size: 16px;
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    right: 16px;
+  }
+}
+
+.addTaskItem {
+  @extend .taskItem;
+  white-space: nowrap;
+
+  &:first-of-type {
+    .taskColumn:first-of-type span {
+      margin-left: 77px;
+    }
+  }
+
+  &:nth-of-type(2) {
+    height: 110px;
+    .taskColumn:first-of-type span {
+      margin-left: 77px;
+    }
+
+    .taskColumn:nth-of-type(2) span {
+      border-radius: 60px;
+      border: 1px solid #00000033;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .taskColumn:nth-of-type(3) span {
+      background-color: transparent;
+      border-radius: 50%;
+    }
+
+    .taskColumn:nth-of-type(3) span,
+    .taskColumn:nth-of-type(4) span {
+      width: 30px;
+      height: 30px;
+      padding: 7px;
+      border-radius: 50%;
+      border: 1px solid #00000033;
+    }
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.statusOptions {
+  width: 111px;
+  top: 36px;
+  font-size: 12px;
+  gap: 13px;
+}
+
+// Task column styles
+
+.check {
+  color: grey;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+.taskColumn {
+  font-size: 14px;
+  font-weight: 500;
+  width: 25%;
+  color: #00000099;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+
+  .columnText {
+    white-space: nowrap;
+  }
+  &:first-of-type {
+    margin-left: 50px;
+  }
+
+  &:nth-of-type(3) {
+    .columnText {
+      background: #dddadd;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    &:nth-of-type(2),
+    &:nth-of-type(3),
+    &:last-of-type {
+      display: none;
+    }
+
+    &:first-of-type {
+      min-width: 68%;
+      span {
+        white-space: wrap;
+      }
+    }
+  }
+
+  &.boardColumn {
+    width: 115px;
+    height: fit-content;
+    display: flex;
+
+    &:first-of-type {
+      font-size: 16px;
+      color: #000;
+      margin-left: 0;
+
+      // overflow: hidden;
+      span {
+        min-width: 225px;
+        white-space: wrap;
+      }
+    }
+
+    &:nth-of-type(2) {
+      font-size: 10px;
+      font-weight: 600;
+      order: 4;
+    }
+
+    &:nth-of-type(3) {
+      visibility: hidden;
+    }
+
+    &:last-of-type {
+      font-size: 10px;
+      font-weight: 600;
+      order: 2;
+    }
+  }
+}
