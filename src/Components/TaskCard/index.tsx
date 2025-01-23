@@ -25,7 +25,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
     activeIndex,
     optionType,
     handleShowOptions,
-    View,
+    listView,
     handleCheckboxChange,
   } = useAppContext();
 
@@ -40,8 +40,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    backgroundColor: isDragging && View === "List" ? "#f9f9f9" : "",
-    borderRadius: isDragging && View === "List" ? "8px" : "",
+    backgroundColor: isDragging && listView ? "#f9f9f9" : "",
+    borderRadius: isDragging && listView ? "8px" : "",
     boxShadow: isDragging ? "0px 4px 4px 0px #0000001a" : "none",
     zIndex: isDragging ? 2 : 0,
     position: "relative",
@@ -56,43 +56,59 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
   };
 
   return (
-    <div className="w-full relative flex">
-      {View === "List" && (
-        <span className="item-center gap-2 absolute z-10 top-4 left-3">
-          <input
-            type="checkbox"
-            name={item.id}
-            id={item.id}
-            value={item.id}
-            onChange={(e) => {
-              handleCheckboxChange(item.id, e.target.checked);
-            }}
-            className={styles.checkbox}
-          />
-          <HiCheckCircle className={styles.check} />
-        </span>
-      )}
+    <div className="w-full relative -z-1">
       <div
-        className={`${styles.taskItem} ${
-          View === "Board" ? styles.boardTask : ""
-        }`}
+        className={`${styles.taskItem} ${!listView ? styles.boardTask : ""}`}
         ref={setNodeRef}
         {...attributes}
-        {...listeners}
         style={style}
+        onClick={(e) => e.stopPropagation()}
       >
-        {listColumns.map((column: listColumnsType, colIndex) => (
-          <span
-            key={colIndex}
-            className={`${styles.taskColumn} ${
-              View === "Board" ? styles.boardColumn : ""
-            }`}
-          >
-            <span className={styles.columnText}>{item[column.dataField]}</span>
+        {listView && (
+          <span className="item-center gap-2 absolute z-10 top-4 left-3">
+            <input
+              type="checkbox"
+              name={item.id}
+              id={item.id}
+              value={item.id}
+              onChange={(e) => {
+                handleCheckboxChange(item.id, e.target.checked);
+              }}
+              className={styles.checkbox}
+            />
+            <HiCheckCircle className={styles.check} />
           </span>
-        ))}
+        )}
+        <div {...listeners} className={styles.taskElements}>
+          {listColumns.map((column: listColumnsType, colIndex) => (
+            <>
+              <span
+                key={colIndex}
+                className={`${styles.taskColumn} ${
+                  !listView ? styles.boardColumn : ""
+                }`}
+              >
+                <span className={styles.columnText}>
+                  {item[column.dataField]}
+                </span>
+              </span>
+            </>
+          ))}
+        </div>
+        <SlOptions
+          className={`${styles.options}`}
+          onClick={() => {
+            handleShowOptions(id, "task");
+          }}
+        />
       </div>
-      {View === "List" && (
+      {isOptPopUp && id === activeIndex && optionType === "task" && (
+        <OptionsPopUp
+          options={taskOptions}
+          className="absolute right-0 top-[34px] p-4 w-[134px] gap-2 z-50"
+        />
+      )}
+      {listView && (
         <>
           <div
             className={`${getStyleClass(
@@ -109,19 +125,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
             />
           )}
         </>
-      )}
-      <SlOptions
-        className={`${styles.options}`}
-        onClick={() => {
-          handleShowOptions(id, "task");
-        }}
-      />
-
-      {isOptPopUp && id === activeIndex && optionType === "task" && (
-        <OptionsPopUp
-          options={taskOptions}
-          className="absolute right-0 top-[34px] p-4 w-[134px] gap-2 z-10"
-        />
       )}
     </div>
   );

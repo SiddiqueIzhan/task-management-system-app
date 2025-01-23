@@ -21,6 +21,7 @@ import {
   get,
   off,
   onValue,
+  push,
   ref,
   remove,
   update,
@@ -31,8 +32,8 @@ import { format } from "date-fns";
 interface contextProps {
   taskData: tasksDataType[];
   setTaskData: (taskData: tasksDataType[]) => void;
-  View: string;
-  setView: (view: string) => void;
+  listView: boolean;
+  setListView: (view: boolean) => void;
   getTaskData: () => void;
   handleAddUpdateTask: (task: tasksDataType) => void;
   handleDeleteTask: (selectedValues: string[]) => void;
@@ -62,9 +63,24 @@ interface contextProps {
   setActiveStatus: (activeColumn: statusType | null) => void;
   eventLog: eventLogType[];
   setEventLog: React.Dispatch<React.SetStateAction<eventLogType[]>>;
-  formatDate: (dateString: string) => string;
   selectedValues: string[];
   handleCheckboxChange: (value: string, isChecked: boolean) => void;
+  getTaskLogs: () => () => void;
+  clearTaskLog: () => Promise<void>;
+  attachments: {
+    id: string;
+    file: File;
+    preview: string;
+  }[];
+  setAttachments: React.Dispatch<
+    React.SetStateAction<
+      {
+        id: string;
+        file: File;
+        preview: string;
+      }[]
+    >
+  >;
 }
 
 const appContext = createContext<contextProps | undefined>(undefined);
@@ -73,7 +89,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [taskData, setTaskData] = useState<tasksDataType[]>([]);
-  const [View, setView] = useState<string>("List");
+  const [listView, setListView] = useState<boolean>(true);
   const [isFormPopUp, setFormPopUp] = useState<EventType>(null);
   const [isOptPopUp, setOptPopUp] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -87,6 +103,9 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [activeStatus, setActiveStatus] = useState<statusType | null>(null);
   const [eventLog, setEventLog] = useState<eventLogType[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<
+    { id: string; file: File; preview: string }[]
+  >([]);
 
   const sortDates = (order: "asc" | "desc") => {
     const dateArray = taskData.map((task) => task.due_date);
@@ -122,13 +141,13 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [popupRef]);
 
   const filterTasks = (data: tasksDataType[]) => {
-    return data.filter((item) => {
+    return data?.filter((item) => {
       const matchesSearch = searchItem
-        ? item.title.toLowerCase().includes(searchItem.toLowerCase())
+        ? item.title?.toLowerCase().includes(searchItem.toLowerCase())
         : true;
 
       const matchesCategory = categoryItem
-        ? item.category.toLowerCase() === categoryItem.toLowerCase()
+        ? item.category?.toLowerCase() === categoryItem.toLowerCase()
         : true;
 
       const matchesDate = dateValue
@@ -163,6 +182,50 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => off(dbRef); // Cleanup the event listener
   };
 
+  const getTaskLogs = () => {
+    const logsRef = child(ref(db), "/main/tasks/logs");
+
+    onValue(
+      logsRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          // Convert the logs object into an array
+          const logsArray = Object.keys(data).map((key) => ({
+            id: key, // Firebase unique key for each log
+            ...data[key],
+          }));
+
+          // Optional: Sort logs by timestamp (if needed)
+          logsArray.sort(
+            (a, b) =>
+              new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime()
+          );
+
+          // Set the logs to state or display them
+          setEventLog(logsArray);
+        }
+      },
+      (error) => console.error("Error fetching task logs:", error)
+    );
+
+    return () => off(logsRef); // Cleanup the event listener
+  };
+
+  const clearTaskLog = async () => {
+    try {
+      const logsRef = ref(db, "/main/tasks/logs"); // Path to task logs in Firebase
+
+      // Remove all data in the logs path
+      await remove(logsRef);
+      setEventLog([]); // Clear local state
+      toast.success("Task Log Cleared");
+    } catch (error) {
+      console.error("Error clearing task logs:", error);
+      toast.error("Failed to clear Task Log");
+    }
+  };
+
   const formatTimeStamp = (isoString: string): string => {
     const date = new Date(isoString); // Parse the ISO string to a Date object
 
@@ -182,21 +245,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     return formattedDate.replace(",", " at");
   };
 
-  const formatDate = (dateString: string): string => {
-    // Parse the input date string (assuming the format is DD/MM/YYYY)
-    const [day, month, year] = dateString.split("/").map(Number);
-    const date = new Date(year, month - 1, day); // Month is 0-based in JavaScript
-
-    // Format the date into "28 Dec, 2024"
-    const options: Intl.DateTimeFormatOptions = {
-      day: "numeric", // Numeric day of the month
-      month: "short", // Short month name (e.g., "Dec")
-      year: "numeric", // Full year
-    };
-
-    return new Intl.DateTimeFormat("en-US", options).format(date);
-  };
-
   const handleCheckboxChange = (value: string, isChecked: boolean) => {
     console.log("checked");
     if (isChecked) {
@@ -207,7 +255,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       setSelectedValues((prev) => prev.filter((item) => item !== value));
     }
   };
-  console.log(selectedValues);
 
   const handleAddUpdateTask = async (newTask: tasksDataType) => {
     try {
@@ -217,24 +264,31 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const dbRef = ref(db, "/main/tasks");
+      const logRef = ref(db, "/main/tasks/logs");
       const snapshot = await get(dbRef);
-      const existingData = snapshot.val() || {}; // Fetch existing data (default to an empty object)
+      const existingData = snapshot.val() || {}; // Fetch existing tasks (default to an empty object)
 
       if (editingTask) {
+        // Update existing task
         const updatedData = {
           ...existingData,
           [editingTask.id]: newTask,
         };
+
         setEditingTask(null);
-        update(dbRef, updatedData);
-        setEventLog((pre) => [
-          ...pre,
-          {
-            activity: `You edited ${editingTask.title} details`,
-            timeStamp: formatTimeStamp(new Date().toISOString()),
-          },
-        ]);
-        toast.success("task edited successfully");
+
+        await update(dbRef, updatedData);
+
+        // Add log entry
+        const newLogEntry = {
+          activity: `You edited ${editingTask.title} details`,
+          timeStamp: formatTimeStamp(new Date().toISOString()),
+        };
+
+        await push(logRef, newLogEntry); // Add log to Firebase logs array
+
+        setEventLog((pre) => [...pre, newLogEntry]);
+        toast.success("Task edited successfully");
       } else {
         // Convert the object to an array if it exists
         const cleanExistingData = Object.keys(existingData).map((key) => ({
@@ -256,15 +310,19 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Save the updated tasks back to Firebase
         await update(ref(db, "/main"), { tasks: dataToSave });
-        setEventLog((pre) => [
-          ...pre,
-          {
-            activity: `You created ${newTask.title} task`,
-            timeStamp: formatTimeStamp(new Date().toISOString()),
-          },
-        ]);
+
+        // Add log entry
+        const newLogEntry = {
+          activity: `You created ${newTask.title} task`,
+          timeStamp: formatTimeStamp(new Date().toISOString()),
+        };
+
+        await push(logRef, newLogEntry); // Add log to Firebase logs array
+
+        setEventLog((pre) => [...pre, newLogEntry]);
         toast.success("Task Added Successfully");
       }
+
       // Clear the popup and show success message
       setFormPopUp(null);
     } catch (error: any) {
@@ -280,6 +338,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const dbRef = ref(db, "/main/tasks");
+      const logRef = ref(db, "/main/tasks/logs");
       const snapshot = await get(dbRef);
       const existingData = snapshot.val();
 
@@ -294,7 +353,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
             updatedData[taskId].status = newStatus;
 
             logs.push({
-              activity: `You changed status of task ${taskId} from ${oldStatus} to ${newStatus}`,
+              activity: `You changed the status of task "${updatedData[taskId].title}" from "${oldStatus}" to "${newStatus}"`,
               timeStamp: formatTimeStamp(new Date().toISOString()),
             });
           }
@@ -303,8 +362,15 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         // Update the database
         await update(dbRef, updatedData);
 
-        // Log the updates
+        // Push logs to Firebase
+        for (const log of logs) {
+          await push(logRef, log);
+        }
+
+        // Update the local event log state
         setEventLog((prev) => [...prev, ...logs]);
+
+        // Clear selected values
         setSelectedValues([]);
         toast.success("Task status updated successfully!");
       } else {
@@ -343,74 +409,75 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const handleDeleteTask = (selectedValues: string[]) => {
+  const handleDeleteTask = async (selectedValues: string[]) => {
     if (selectedValues.length === 0) {
       toast.error("No tasks selected for deletion.");
       return;
     }
 
     try {
-      // Reference to the tasks root
       const dbRef = ref(db, "/main/tasks");
+      const logRef = ref(db, "/main/tasks/logs");
 
-      onValue(
-        dbRef,
-        (snapshot) => {
-          const existingData = snapshot.val();
-          if (!existingData) {
-            toast.error("No tasks found in the database.");
-            return;
+      const snapshot = await get(dbRef);
+      const existingData = snapshot.val();
+
+      if (!existingData) {
+        toast.error("No tasks found in the database.");
+        return;
+      }
+
+      const logs: { activity: string; timeStamp: string }[] = [];
+      const deletedTasks: string[] = [];
+      const failedTasks: string[] = [];
+
+      // Iterate over selected values to delete
+      for (const taskId of selectedValues) {
+        if (existingData[taskId]) {
+          const title = existingData[taskId].title;
+          const taskRef = ref(db, `/main/tasks/${taskId}`);
+
+          try {
+            await remove(taskRef);
+            deletedTasks.push(title);
+
+            // Add deletion log
+            logs.push({
+              activity: `You deleted the task "${title}"`,
+              timeStamp: formatTimeStamp(new Date().toISOString()),
+            });
+          } catch (error) {
+            failedTasks.push(title);
+            console.error(`Error deleting task "${title}":`, error);
           }
+        } else {
+          failedTasks.push(taskId);
+        }
+      }
 
-          const deletedTasks: string[] = [];
-          const failedTasks: string[] = [];
+      // Push logs to Firebase
+      for (const log of logs) {
+        await push(logRef, log);
+      }
 
-          // Iterate over selected values to delete
-          selectedValues.forEach((taskId) => {
-            if (existingData[taskId]) {
-              const title = existingData[taskId].title;
-              const taskRef = ref(db, `/main/tasks/${taskId}`);
+      // Update the local event log state
+      setEventLog((prev) => [...prev, ...logs]);
 
-              remove(taskRef)
-                .then(() => {
-                  deletedTasks.push(title);
-                  // Log the deletion
-                  toast.success("Tasks Deleted Successfully");
-                  setEventLog((pre) => [
-                    ...pre,
-                    {
-                      activity: `You deleted ${title} task`,
-                      timeStamp: formatTimeStamp(new Date().toISOString()),
-                    },
-                  ]);
-                })
-                .catch((error) => {
-                  failedTasks.push(title);
-                  console.error(`Error deleting task "${title}":`, error);
-                });
-            } else {
-              failedTasks.push(taskId);
-            }
-          });
+      // Show toast notifications for results
+      if (deletedTasks.length > 0) {
+        toast.success(`Deleted tasks: ${deletedTasks.join(", ")}`);
+      }
+      if (failedTasks.length > 0) {
+        toast.error(`Failed to delete: ${failedTasks.join(", ")}`);
+      }
 
-          // Show toast notifications for results
-          if (deletedTasks.length > 0) {
-            toast.success(`Deleted tasks: ${deletedTasks.join(", ")}`);
-          }
-          if (failedTasks.length > 0) {
-            toast.error(`Failed to delete: ${failedTasks.join(", ")}`);
-          }
-
-          // Reload if all tasks are deleted
-          if (deletedTasks.length === taskData.length) {
-            window.location.reload();
-          }
-        },
-        { onlyOnce: true }
-      );
+      // Reload if all tasks are deleted
+      if (deletedTasks.length === taskData.length) {
+        window.location.reload();
+      }
 
       setOptPopUp(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error handling delete operation:", error);
       toast.error("Error handling delete operation.");
     }
@@ -421,9 +488,10 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         taskData,
         setTaskData,
-        View,
-        setView,
+        listView,
+        setListView,
         getTaskData,
+
         handleAddUpdateTask,
         isFormPopUp,
         setFormPopUp,
@@ -452,9 +520,12 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setActiveStatus,
         eventLog,
         setEventLog,
-        formatDate,
         selectedValues,
         handleCheckboxChange,
+        getTaskLogs,
+        clearTaskLog,
+        attachments,
+        setAttachments,
       }}
     >
       {children}

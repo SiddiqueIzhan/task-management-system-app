@@ -21,8 +21,8 @@ const Header: React.FC<headerProps> = ({ user }) => {
     popupRef,
     searchItem,
     setSearchItem,
-    View,
-    setView,
+    listView,
+    setListView,
   } = useAppContext();
 
   return (
@@ -37,9 +37,10 @@ const Header: React.FC<headerProps> = ({ user }) => {
           </div>
           <Tabs
             data={ViewData}
-            activeTab={View}
-            setActiveTab={setView}
+            activeTab={listView}
+            setActiveTab={setListView}
             isPopUp={false}
+            showIcon={true}
           />
         </div>
 

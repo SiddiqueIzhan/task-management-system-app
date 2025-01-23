@@ -1,27 +1,33 @@
+import { IoList } from "react-icons/io5";
 import styles from "./Tabs.module.scss";
-import { ToggleDataType } from "../../Utils/types";
+import { MdDeveloperBoard } from "react-icons/md";
 
 interface TabsProps {
-  data: ToggleDataType[];
-  activeTab: string;
-  setActiveTab: (activeTab: string) => void;
+  data: string[];
+  activeTab: boolean;
+  setActiveTab: (activeTab: boolean) => void;
   isPopUp: boolean;
+  showIcon: boolean;
 }
 
-const Tabs = ({ data, activeTab, setActiveTab, isPopUp }: TabsProps) => {
+const Tabs = ({
+  data,
+  activeTab,
+  setActiveTab,
+  isPopUp,
+  showIcon,
+}: TabsProps) => {
   return (
     <div
       className={`${styles.toggleContainer} ${isPopUp && styles.togglePopUp}`}
     >
-      {data.map(({ show, icon }, index) => {
+      {/* {data.map(({ show, icon }, index) => {
         const IconComponent = icon;
         return (
           <div
             key={index}
-            className={`${styles.toggleOption} ${
-              show === activeTab ? styles.active : ""
-            } `}
-            onClick={() => setActiveTab(show)}
+            className={`${styles.toggleOption} ${activeTab && styles.active} `}
+            onClick={() => setActiveTab(!activeTab)}
           >
             {IconComponent && (
               <span className={styles.icon}>
@@ -31,7 +37,29 @@ const Tabs = ({ data, activeTab, setActiveTab, isPopUp }: TabsProps) => {
             <span className={styles.type}>{show}</span>
           </div>
         );
-      })}
+      })} */}
+      <div
+        className={`${styles.toggleOption} ${activeTab && styles.active} `}
+        onClick={() => setActiveTab(true)}
+      >
+        {showIcon && (
+          <span className={styles.icon}>
+            <IoList />
+          </span>
+        )}
+        <span className={styles.type}>{data[0]}</span>
+      </div>
+      <div
+        className={`${styles.toggleOption} ${!activeTab && styles.active} `}
+        onClick={() => setActiveTab(false)}
+      >
+        {showIcon && (
+          <span className={styles.icon}>
+            <MdDeveloperBoard />
+          </span>
+        )}
+        <span className={styles.type}>{data[1]}</span>
+      </div>
     </div>
   );
 };

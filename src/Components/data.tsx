@@ -1,33 +1,9 @@
 import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDeveloperBoard } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import { IoList } from "react-icons/io5";
-import {
-  cardItemType,
-  listColumnsType,
-  optionsType,
-  ToggleDataType,
-} from "../Utils/types";
+import { cardItemType, listColumnsType, optionsType } from "../Utils/types";
 
-export const ViewData: ToggleDataType[] = [
-  {
-    show: "List",
-    icon: IoList,
-  },
-  {
-    show: "Board",
-    icon: MdDeveloperBoard,
-  },
-];
-
-export const togglePopSection: ToggleDataType[] = [
-  {
-    show: "DETAILS",
-  },
-  {
-    show: "ACTIVITY",
-  },
-];
+export const ViewData = ["List", "Board"];
+export const SectionData = ["DETAILS", "ACTIVITY"];
 
 export const taskOptions: optionsType[] = [
   {

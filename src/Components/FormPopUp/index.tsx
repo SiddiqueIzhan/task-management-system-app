@@ -1,18 +1,14 @@
 import { IoMdClose } from "react-icons/io";
 import styles from "./FormPopUp.module.scss";
 import { useFormik } from "formik";
-import { RiBold } from "react-icons/ri";
-import { TbItalic } from "react-icons/tb";
-import { RiStrikethrough } from "react-icons/ri";
-import { RiListOrdered2 } from "react-icons/ri";
-import { RiListUnordered } from "react-icons/ri";
-import { togglePopSection } from "../data";
+import { SectionData } from "../data";
 import { ValidationSchema } from "../../schemas";
 import { EventType, tasksDataType } from "../../Utils/types";
 import { RefObject, useEffect, useState } from "react";
 import { useAppContext } from "../../Context/appContext";
 import Tabs from "../Tabs";
-import { toast } from "react-toastify";
+import FormSection from "../FormSection";
+import TaskLogSection from "../TaskLogSection";
 
 interface FormPopUpProps {
   setFormPopUp: (FormPopUp: EventType) => void;
@@ -33,9 +29,8 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
     isFormPopUp,
     editingTask,
     handleAddUpdateTask,
-    eventLog,
-    setEventLog,
     setOptPopUp,
+    clearTaskLog,
   } = useAppContext();
 
   const {
@@ -68,7 +63,7 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
     }
   }, [editingTask]);
 
-  const [showSection, setShowSection] = useState("DETAILS");
+  const [showForm, setShowForm] = useState(true);
 
   const getStyleClass = () => {
     if (isFormPopUp === "add") {
@@ -89,18 +84,16 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
           ref={popupRef}
         >
           <div className={styles.modalHeader}>
-            {isFormPopUp === "add" && <h1>Create Task</h1>}
-            {isFormPopUp === "edit" && showSection === "ACTIVITY" && (
+            {isFormPopUp === "edit" && !showForm && (
               <span
                 className="w-[90px] h-[30px] bg-[#7B1984] px-2 py-[6.5px] rounded-[60px] item-center gap-1 text-white text-xs justify-center"
-                onClick={() => {
-                  setEventLog([]);
-                  if (!eventLog) toast.success("Task Log Cleared");
-                }}
+                onClick={clearTaskLog}
               >
                 CLEAR
               </span>
             )}
+            <h1>{isFormPopUp === "add" && "Create Task"}</h1>
+
             <IoMdClose
               className={styles.closeIcon}
               onClick={() => {
@@ -111,197 +104,49 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
           </div>
           {isFormPopUp === "edit" && (
             <Tabs
-              data={togglePopSection}
-              activeTab={showSection}
-              setActiveTab={setShowSection}
+              data={SectionData}
+              activeTab={showForm}
+              setActiveTab={setShowForm}
               isPopUp={true}
+              showIcon={false}
             />
           )}
           <form onSubmit={handleSubmit}>
-            <div className="flex flex-col md:flex-row overflow-scroll">
-              {showSection === "DETAILS" && (
-                <div
-                  className={`${styles.formSection} 
-                ${"w-full"}
-                `}
-                >
-                  <div
-                    className={`${styles.inputSection} ${
-                      errors.title && touched.title && `${styles.error}`
-                    }`}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Task title"
-                      name="title"
-                      value={values.title}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                    />
-                  </div>
-                  {errors.title && touched.title && (
-                    <p className="text-[10px] text-red-600">{errors.title}</p>
-                  )}
-                  <div
-                    className={`${styles.inputSection} ${
-                      errors.description &&
-                      touched.description &&
-                      `${styles.error}`
-                    }`}
-                  >
-                    <div className={styles.top}>
-                      <textarea
-                        name="description"
-                        id="description"
-                        placeholder={`Description`}
-                        value={values.description}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      ></textarea>
-                      <div className={styles.bottom}>
-                        <div className={styles.textEditOptions}>
-                          <RiBold />
-                          <TbItalic />
-                          <RiStrikethrough />
-                          <hr />
-                          <RiListOrdered2 />
-                          <RiListUnordered />
-                        </div>
-                        <span>0/300 characters</span>
-                      </div>
-                    </div>
-                  </div>
-                  {errors.description && touched.description && (
-                    <p className="text-[10px] text-red-600">
-                      {errors.description}
-                    </p>
-                  )}
-                  <div className={styles.requiredFields}>
-                    <div className={styles.subSection}>
-                      <label>Task Category*</label>
-                      <div className={styles.categoryOptions}>
-                        <span
-                          className={`${
-                            values.category === "Work"
-                              ? styles.activeCategory
-                              : ""
-                          }`}
-                          onClick={() =>
-                            handleChange({
-                              target: { name: "category", value: "Work" },
-                            })
-                          }
-                        >
-                          Work
-                        </span>
-                        <span
-                          className={`${
-                            values.category === "Personal"
-                              ? styles.activeCategory
-                              : ""
-                          }`}
-                          onClick={() =>
-                            handleChange({
-                              target: { name: "category", value: "Personal" },
-                            })
-                          }
-                        >
-                          Personal
-                        </span>
-                      </div>
-                      {errors.category && touched.category && (
-                        <p className="text-[10px] text-red-600">
-                          {errors.category}
-                        </p>
-                      )}
-                    </div>
+            <div className="mobile-view">
+              <div className="flex flex-col md:flex-row overflow-scroll">
+                {showForm ? (
+                  <FormSection
+                    values={values}
+                    touched={touched}
+                    errors={errors}
+                    handleChange={handleChange}
+                    handleBlur={handleBlur}
+                  />
+                ) : (
+                  <>{isFormPopUp === "edit" && <TaskLogSection />}</>
+                )}
+              </div>
+            </div>
+            <div className="desktop-view">
+              <div
+                className={isFormPopUp === "add" ? "w-full h-full" : `w-7/12`}
+              >
+                <FormSection
+                  values={values}
+                  touched={touched}
+                  errors={errors}
+                  handleChange={handleChange}
+                  handleBlur={handleBlur}
+                />
+              </div>
 
-                    <div className={styles.subSection}>
-                      <label>Due on*</label>
-                      <div
-                        className={`${styles.inputSection} ${
-                          errors.due_date &&
-                          touched.due_date &&
-                          `${styles.error}`
-                        }`}
-                      >
-                        <input
-                          type="date"
-                          name="due_date"
-                          className=""
-                          value={values.due_date}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        />
-                      </div>
-                      {errors.due_date && touched.due_date && (
-                        <p className="text-[10px] text-red-600">
-                          {errors.due_date}
-                        </p>
-                      )}
-                    </div>
-                    <div className={styles.subSection}>
-                      <label>Task Status*</label>
-                      <div
-                        className={`${styles.inputSection} ${
-                          errors.status && touched.status && `${styles.error}`
-                        }`}
-                      >
-                        <select
-                          name="status"
-                          className=""
-                          value={values.status}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        >
-                          <option value="">Choose</option>
-                          <option value="TO-DO">TO-DO</option>
-                          <option value="IN-PROGRESS">IN-PROGRESS</option>
-                          <option value="COMPLETED">COMPLETED</option>
-                        </select>
-                      </div>
-                      {errors.status && touched.status && (
-                        <p className="text-[10px] text-red-600">
-                          {errors.status}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className={styles.attachmentSection}>
-                    <label>Attachment</label>
-                    <div className={styles.inputSection}>
-                      <label htmlFor="file-input" className={styles.message}>
-                        <span>Drop your files here or </span>
-                        <span className="text-blue-500 cursor-pointer">
-                          Upload
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isFormPopUp === "edit" && showSection === "ACTIVITY" && (
-                <div className={styles.activitySection}>
-                  <div className={styles.header}>
-                    <h1>Activity</h1>
-                  </div>
-                  {eventLog.length === 0 && (
-                    <p className="text-2xl text-gray-500 text-center m-auto">
-                      No activity yet
-                    </p>
-                  )}
-                  {eventLog.map((elem, index) => {
-                    return (
-                      <div key={index} className={styles.activity}>
-                        <span>{elem.activity}</span>
-                        <span>{elem.timeStamp}</span>
-                      </div>
-                    );
-                  })}
+              {isFormPopUp === "edit" && (
+                <div className="w-5/12">
+                  <TaskLogSection />
                 </div>
               )}
             </div>
+
             <div className={styles.buttonSection}>
               <button
                 type="button"

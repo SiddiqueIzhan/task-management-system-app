@@ -25,7 +25,7 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
     taskData,
     setTaskData,
     sortDates,
-    View,
+    listView,
     setActiveCard,
     setActiveStatus,
   } = useAppContext();
@@ -69,7 +69,7 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
           </div>
         ) : (
           <>
-            {View === "List" && (
+            {listView && (
               <div className="w-full border-t display-grid p-[10px] ">
                 {listColumns.map((column, index) => (
                   <span
@@ -100,7 +100,7 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
             >
               <div
                 className={`flex gap-5 md:gap-8 ${
-                  View === "Board" ? "flex-row" : "flex-col"
+                  !listView ? "flex-row" : "flex-col"
                 }`}
               >
                 {cardDetails.map((cardItem, cardIndex) => (

@@ -19,7 +19,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
   const [hideList, setHideList] = useState(false);
   const [count, setCount] = useState(0);
 
-  const { getTaskData, searchItem, categoryItem, dateValue, View } =
+  const { getTaskData, searchItem, categoryItem, dateValue, listView } =
     useAppContext();
 
   useEffect(() => {
@@ -45,18 +45,16 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
       ) : (
         <div
           className={`${styles.parent} ${hideList && styles.hideCard} ${
-            View === "Board" && styles.boardParent
+            !listView && styles.boardParent
           } ${getStyleClass()}`}
         >
           <div
             className={`${styles.status} ${
-              View === "Board" ? styles.boardStatus : styles.listStatus
+              !listView ? styles.boardStatus : styles.listStatus
             }`}
           >
             <span>
-              {View === "List"
-                ? `${cardItem.title} (${count})`
-                : cardItem.status}
+              {listView ? `${cardItem.title} (${count})` : cardItem.status}
             </span>
             <FaAngleDown
               className={`${styles.arrow} ${
@@ -67,7 +65,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
           </div>
           <div
             className={`${styles.cardContainer} ${
-              View === "Board"
+              !listView
                 ? `${styles.board}`
                 : `${styles.list} ${hideList ? `${styles.hideList}` : ``}`
             }`}
