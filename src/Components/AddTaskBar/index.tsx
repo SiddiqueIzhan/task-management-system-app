@@ -12,10 +12,10 @@ interface addTaskBarProps {
 
 const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
   const [showAddTaskBar, setShowAddTaskbar] = useState(false);
-  const { View } = useAppContext();
+  const { listView } = useAppContext();
   return (
     <>
-      {cardItem.status === "TO-DO" && View === "List" && (
+      {cardItem.status === "TO-DO" && listView && (
         <>
           <div className={styles.addTaskItem}>
             <div className={styles.taskColumn}>
