@@ -205,16 +205,13 @@
   white-space: nowrap;
 
   &:first-of-type {
-    .taskColumn:first-of-type span {
-      margin-left: 77px;
+    .taskColumn:first-of-type {
+      margin-left: 55px;
     }
   }
 
   &:nth-of-type(2) {
     height: 110px;
-    .taskColumn:first-of-type span {
-      margin-left: 77px;
-    }
 
     .taskColumn:nth-of-type(2) span {
       border-radius: 60px;
@@ -228,16 +225,17 @@
 
     .taskColumn:nth-of-type(3) span {
       background-color: transparent;
-      border-radius: 50%;
     }
 
-    .taskColumn:nth-of-type(3) span,
-    .taskColumn:nth-of-type(4) span {
-      width: 30px;
-      height: 30px;
+    .add {
       padding: 7px;
       border-radius: 50%;
       border: 1px solid #00000033;
+
+      &.added {
+        padding: 6px 10px;
+        border-radius: 60px;
+      }
     }
   }
 

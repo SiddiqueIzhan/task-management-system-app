@@ -8,10 +8,12 @@ const FilterOptions = () => {
   const {
     optionType,
     handleShowOptions,
-    dateValue,
+    dateValueFilter,
     categoryItem,
-    onChangeDate,
+    onChangeDateFilter,
     setCategoryItem,
+    eventType,
+    setEventType,
   } = useAppContext();
 
   return (
@@ -20,12 +22,16 @@ const FilterOptions = () => {
       <div className="item-center gap-[10px] relative">
         <span
           className="w-[90px] h-[30px] px-2 py-[6.5px] rounded-[60px] border border-[#00000033] item-center gap-1 text-[#00000099] text-xs relative"
-          onClick={() => handleShowOptions("0", "category")}
+          onClick={() => {
+            setEventType("filter");
+            handleShowOptions("0", "category");
+          }}
         >
-          {optionType === "category" && (
+          {optionType === "category" && eventType === "filter" && (
             <OptionsPopUp
               options={categoryOptions}
               className={"absolute top-10 right-0 gap-[13px]"}
+              event={eventType}
             />
           )}
           <span>{categoryItem ? categoryItem : "Category"}</span>
@@ -39,10 +45,13 @@ const FilterOptions = () => {
         </span>
         <span
           className="w-[90px] h-[30px] px-2 py-[6.5px] rounded-[60px] border border-[#00000033] item-center gap-1 text-[#00000099] text-xs"
-          onClick={() => handleShowOptions("1", "calendar")}
+          onClick={() => {
+            setEventType("filter");
+            handleShowOptions("1", "calendar");
+          }}
         >
           <span>
-            {dateValue ? dateValue.toLocaleString().slice(0, 10) : "Due Date"}
+            {dateValueFilter ? dateValueFilter.toLocaleString().slice(0, 10) : "Due Date"}
           </span>
           <FaAngleDown
             className={
@@ -52,15 +61,15 @@ const FilterOptions = () => {
             }
           />
         </span>
-        {optionType === "calendar" && (
-          <OptionsPopUp className="absolute top-10" />
+        {optionType === "calendar" && eventType === "filter" && (
+          <OptionsPopUp className="absolute top-10" event={eventType} />
         )}
         <span
           className="w-[90px] h-[30px] bg-[#7B1984] px-2 py-[6.5px] rounded-[60px] item-center gap-1 text-white text-xs justify-center"
           onClick={() => {
-            onChangeDate(null);
+            onChangeDateFilter(null);
             setCategoryItem(null);
-            toast.success("Reset Successful")
+            toast.success("Reset Successful");
           }}
         >
           RESET

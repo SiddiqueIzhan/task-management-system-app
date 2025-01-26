@@ -34,7 +34,7 @@ export interface eventLogType {
 
 export type OptionType = "category" | "status" | "task" | "calendar" | null;
 
-export type EventType = "add" | "edit" | null;
+export type EventType = "add" | "edit" | "filter" | "task" | null;
 
 export type filterType = "WORK" | "PERSONAL" | null;
 

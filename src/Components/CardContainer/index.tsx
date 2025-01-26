@@ -29,12 +29,12 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
     onDragCancel: () => setIsDragging(false),
   });
 
-  const { getTaskData, searchItem, categoryItem, dateValue, listView } =
+  const { getTaskData, searchItem, categoryItem, dateValueFilter, listView } =
     useAppContext();
 
   useEffect(() => {
     getTaskData();
-  }, [searchItem, categoryItem, dateValue]);
+  }, [searchItem, categoryItem, dateValueFilter]);
 
   useEffect(() => {
     setCount(tasks.length);

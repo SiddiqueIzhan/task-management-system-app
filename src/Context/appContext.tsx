@@ -46,8 +46,10 @@ interface contextProps {
   optionType: OptionType;
   setOptionType: (optionType: OptionType) => void;
   handleShowOptions: (index: string, optionType: OptionType) => void;
-  dateValue: Value;
-  onChangeDate: React.Dispatch<React.SetStateAction<Value>>;
+  dateValueFilter: Value;
+  onChangeDateFilter: React.Dispatch<React.SetStateAction<Value>>;
+  dateValueAdd: Value;
+  onChangeDateAdd: React.Dispatch<React.SetStateAction<Value>>;
   searchItem: string;
   setSearchItem: (searchItem: string) => void;
   categoryItem: filterType;
@@ -77,6 +79,11 @@ interface contextProps {
     >
   >;
   handleUpdateStatus: (newStatus: string, taskId?: string) => Promise<void>;
+  eventType: EventType;
+  setEventType: (eventType: EventType) => void;
+  addingTask: tasksDataType | null;
+  setAddingTask: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
+  handleAddTask: (key: string, value: string) => void;
 }
 
 const appContext = createContext<contextProps | undefined>(undefined);
@@ -91,7 +98,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const popupRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState<string | null>(null);
   const [optionType, setOptionType] = useState<OptionType>(null);
-  const [dateValue, onChangeDate] = useState<Value>(null);
+  const [dateValueFilter, onChangeDateFilter] = useState<Value>(null);
+  const [dateValueAdd, onChangeDateAdd] = useState<Value>(null);
   const [searchItem, setSearchItem] = useState("");
   const [categoryItem, setCategoryItem] = useState<filterType>(null);
   const [editingTask, setEditingTask] = useState<tasksDataType | null>(null);
@@ -100,6 +108,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [attachments, setAttachments] = useState<
     { id: string; file: File; preview: string }[]
   >([]);
+  const [eventType, setEventType] = useState<EventType>(null);
+  const [addingTask, setAddingTask] = useState<tasksDataType | null>(null);
 
   const sortDates = (order: "asc" | "desc") => {
     const dateArray = taskData.map((task) => task.due_date);
@@ -144,8 +154,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         ? item.category?.toLowerCase() === categoryItem.toLowerCase()
         : true;
 
-      const matchesDate = dateValue
-        ? item.due_date === format(dateValue.toString(), "yyyy-MM-dd")
+      const matchesDate = dateValueFilter
+        ? item.due_date === format(dateValueFilter.toString(), "yyyy-MM-dd")
         : true;
 
       return matchesSearch && matchesCategory && matchesDate;
@@ -513,6 +523,19 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleAddTask = (key: string, value: string) => {
+    console.log(key, value);
+    setAddingTask((prevTask) => {
+      // Ensure the state always returns a valid tasksDataType object
+      const updatedTask = {
+        ...(prevTask || { id: "", status: "" }), // Provide defaults if prevTask is null
+        [key]: value, // Update the specified key
+      };
+
+      return updatedTask as tasksDataType; // Ensure it matches the tasksDataType interface
+    });
+  };
+
   return (
     <appContext.Provider
       value={{
@@ -534,8 +557,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         optionType,
         setOptionType,
         handleShowOptions,
-        dateValue,
-        onChangeDate,
+        dateValueFilter,
+        onChangeDateFilter,
         searchItem,
         setSearchItem,
         categoryItem,
@@ -553,6 +576,13 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         attachments,
         setAttachments,
         handleUpdateStatus,
+        eventType,
+        setEventType,
+        addingTask,
+        setAddingTask,
+        handleAddTask,
+        dateValueAdd,
+        onChangeDateAdd,
       }}
     >
       {children}

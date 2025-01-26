@@ -1,43 +1,64 @@
 import { useAppContext } from "../../Context/appContext";
-import { optionsType } from "../../Utils/types";
+import { EventType, optionsType } from "../../Utils/types";
+import CalendarComp from "../CalendarComp";
 import FormPopUp from "../FormPopUp";
-import Calendar from "react-calendar";
 
 interface OptionsPopUpProps {
   options?: optionsType[];
   className?: string;
   rowIndex?: number;
+  event?: EventType;
 }
 
-const OptionsPopUp: React.FC<OptionsPopUpProps> = ({ options, className }) => {
+const OptionsPopUp: React.FC<OptionsPopUpProps> = ({
+  options,
+  className,
+  event,
+}) => {
   const {
     popupRef,
     handleDeleteTask,
     activeIndex,
     optionType,
-    onChangeDate,
-    dateValue,
+    onChangeDateFilter,
+    dateValueFilter,
     isFormPopUp,
     setFormPopUp,
     setCategoryItem,
     handleFindTask,
     selectedValues,
+    handleAddTask,
+    onChangeDateAdd,
+    dateValueAdd,
   } = useAppContext();
 
+  function capitalize(word: string): string {
+    if (!word) return "";
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }
+
   const handleTaskOptions = (opt: string) => {
-    if (opt === "Edit") {
+    if (opt === "Edit" && event === "task") {
       setFormPopUp("edit");
       handleFindTask(activeIndex as string);
-    } else if (opt === "Delete")
+    } else if (opt === "Delete" && event === "task")
       handleDeleteTask(selectedValues, activeIndex as string);
     else if (opt === "WORK" || opt === "PERSONAL") {
-      setCategoryItem(opt);
+      if (event === "filter") {
+        setCategoryItem(opt);
+      } else if (event === "add") {
+        handleAddTask("category", capitalize(opt));
+      }
     } else if (
       opt === "TO-DO" ||
       opt === "IN-PROGRESS" ||
       opt === "COMPLETED"
     ) {
-      handleFindTask(activeIndex as string, opt); // Wait for the task to be found
+      if (event === "edit") {
+        handleFindTask(activeIndex as string, opt); // Wait for the task to be found
+      } else if (event === "add") {
+        handleAddTask("status", opt);
+      }
     }
   };
 
@@ -48,7 +69,20 @@ const OptionsPopUp: React.FC<OptionsPopUpProps> = ({ options, className }) => {
       ref={popupRef}
     >
       {optionType === "calendar" ? (
-        <Calendar onChange={onChangeDate} value={dateValue} />
+        <>
+          {event === "filter" && (
+            <CalendarComp
+              dateValue={dateValueFilter}
+              onChangeDate={onChangeDateFilter}
+            />
+          )}
+          {event === "add" && (
+            <CalendarComp
+              dateValue={dateValueAdd}
+              onChangeDate={onChangeDateAdd}
+            />
+          )}
+        </>
       ) : (
         <>
           {options?.map((option, index) => {
