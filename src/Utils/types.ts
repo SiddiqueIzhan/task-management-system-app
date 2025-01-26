@@ -2,6 +2,7 @@ import { IconType } from "react-icons";
 
 export interface tasksDataType {
   id: string;
+  status: string;
   [key: string]: string;
 }
 

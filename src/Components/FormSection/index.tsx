@@ -36,7 +36,7 @@ const FormSection = ({
   handleChange,
   handleBlur,
 }: FormSectionProps) => {
-  const { attachments, setAttachments } = useAppContext();
+  const { attachments, setAttachments, isFormPopUp } = useAppContext();
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;
 
@@ -58,9 +58,11 @@ const FormSection = ({
 
   return (
     <div
-      className={`${styles.formSection} 
-                ${"w-full"}
-                `}
+      className={`${styles.formSection} ${
+        isFormPopUp === "add"
+          ? "md:h-[403px] lg:h-[517px] xl:h-[610px]"
+          : "md:h-[355px] lg:h-[460px] xl:h-[550px]"
+      }`}
     >
       <div
         className={`${styles.inputSection} ${

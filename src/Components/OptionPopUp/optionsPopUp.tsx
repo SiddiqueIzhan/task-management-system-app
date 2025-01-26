@@ -28,7 +28,8 @@ const OptionsPopUp: React.FC<OptionsPopUpProps> = ({ options, className }) => {
     if (opt === "Edit") {
       setFormPopUp("edit");
       handleFindTask(activeIndex as string);
-    } else if (opt === "Delete") handleDeleteTask(selectedValues);
+    } else if (opt === "Delete")
+      handleDeleteTask(selectedValues, activeIndex as string);
     else if (opt === "WORK" || opt === "PERSONAL") {
       setCategoryItem(opt);
     } else if (

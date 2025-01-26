@@ -5,13 +5,9 @@ import { cardDetails, listColumns } from "../Components/data";
 import { ToastContainer } from "react-toastify";
 import { useAppContext } from "../Context/appContext";
 import { FaCaretUp } from "react-icons/fa";
-import {
-  closestCorners,
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-} from "@dnd-kit/core";
+import { closestCorners, DndContext, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { tasksDataType } from "../Utils/types";
 
 interface userPageProps {
   user: User;
@@ -26,34 +22,39 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
     setTaskData,
     sortDates,
     listView,
-    setActiveCard,
-    setActiveStatus,
+    handleUpdateStatus,
   } = useAppContext();
 
-  const handleDragStart = (event: DragStartEvent) => {
-    if (event.active.data.current?.type === "Column") {
-      setActiveStatus(event.active.data.current.id);
-    }
-    setActiveCard(String(event.active.id));
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const getTaskPos = (id: string): number =>
-      taskData.findIndex((item) => item.id === id);
-    const originalPos = getTaskPos(String(active.id));
-    const targetPos = getTaskPos(String(over.id));
-    setTaskData(arrayMove(taskData, originalPos, targetPos));
+    const getTaskPos = (tasks: tasksDataType[], id: string): number =>
+      tasks.findIndex((item) => item.id === id);
 
-    if (event.active.data.current?.type === "Column") {
-      const getTaskPos = (id: string): number =>
-        cardDetails.findIndex((item) => item.status === id);
-      const originalPos = getTaskPos(String(active.id));
-      const targetPos = getTaskPos(String(over.id));
-      setTaskData(arrayMove(taskData, originalPos, targetPos));
-    }
+    setTaskData((prevTasks: tasksDataType[]) => {
+      const originalPos = getTaskPos(prevTasks, String(active.id));
+      const targetPos = getTaskPos(prevTasks, String(over.id));
+
+      // Check if the statuses are different
+      if (
+        active.data.current?.status !== over.data.current?.status ||
+        over.id === "empty-placeholder"
+      ) {
+        const updatedTasks = [...prevTasks];
+        const movedTask = {
+          ...updatedTasks[originalPos],
+          status: over.data.current?.status,
+        };
+        handleUpdateStatus(movedTask.status, movedTask.id);
+        updatedTasks.splice(originalPos, 1); // Remove the task from its original position
+        updatedTasks.splice(targetPos, 0, movedTask); // Insert the task in the new position
+
+        return updatedTasks; // Return the updated tasks array
+      }
+
+      return arrayMove(prevTasks, originalPos, targetPos); // Use arrayMove for sorting within the same container
+    });
   };
 
   return (
@@ -94,8 +95,7 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
               </div>
             )}
             <DndContext
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
               collisionDetection={closestCorners}
             >
               <div

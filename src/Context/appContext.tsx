@@ -11,7 +11,6 @@ import {
   EventType,
   filterType,
   OptionType,
-  statusType,
   tasksDataType,
   Value,
 } from "../Utils/types";
@@ -31,12 +30,12 @@ import { format } from "date-fns";
 
 interface contextProps {
   taskData: tasksDataType[];
-  setTaskData: (taskData: tasksDataType[]) => void;
+  setTaskData: React.Dispatch<React.SetStateAction<tasksDataType[]>>;
   listView: boolean;
   setListView: (view: boolean) => void;
   getTaskData: () => void;
   handleAddUpdateTask: (task: tasksDataType) => void;
-  handleDeleteTask: (selectedValues: string[]) => void;
+  handleDeleteTask: (selectedValues: string[], taskId: string) => void;
   isFormPopUp: EventType;
   setFormPopUp: (FormPopUp: EventType) => void;
   isOptPopUp: boolean;
@@ -57,10 +56,6 @@ interface contextProps {
   setEditingTask: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
   handleFindTask: (taskId: string, newStatus?: string) => void;
   sortDates: (order: "asc" | "desc") => void;
-  activeCard: string | null;
-  setActiveCard: (activeCard: string | null) => void;
-  activeStatus: statusType | null;
-  setActiveStatus: (activeColumn: statusType | null) => void;
   eventLog: eventLogType[];
   setEventLog: React.Dispatch<React.SetStateAction<eventLogType[]>>;
   selectedValues: string[];
@@ -81,6 +76,7 @@ interface contextProps {
       }[]
     >
   >;
+  handleUpdateStatus: (newStatus: string, taskId?: string) => Promise<void>;
 }
 
 const appContext = createContext<contextProps | undefined>(undefined);
@@ -99,8 +95,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [searchItem, setSearchItem] = useState("");
   const [categoryItem, setCategoryItem] = useState<filterType>(null);
   const [editingTask, setEditingTask] = useState<tasksDataType | null>(null);
-  const [activeCard, setActiveCard] = useState<string | null>(null);
-  const [activeStatus, setActiveStatus] = useState<statusType | null>(null);
   const [eventLog, setEventLog] = useState<eventLogType[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<
@@ -246,7 +240,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleCheckboxChange = (value: string, isChecked: boolean) => {
-    console.log("checked");
     if (isChecked) {
       // Add the value to the selectedValues array
       setSelectedValues((prev) => [...prev, value]);
@@ -330,9 +323,14 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const handleUpdateStatus = async (newStatus: string) => {
-    if (selectedValues.length === 0) {
+  const handleUpdateStatus = async (newStatus: string, taskId?: string) => {
+    // Validation for listView and selectedValues
+    if (listView && selectedValues.length === 0 && !taskId) {
       toast.error("No tasks selected for updating.");
+      return;
+    }
+    if (!listView && !taskId) {
+      toast.error("Task ID is required to update the status.");
       return;
     }
 
@@ -343,11 +341,26 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       const existingData = snapshot.val();
 
       if (existingData) {
-        // Create a copy of the data and update the status of selected tasks
+        // Prepare updatedData and logs
         const updatedData = { ...existingData };
         const logs: { activity: string; timeStamp: string }[] = [];
 
-        selectedValues.forEach((taskId) => {
+        if (listView && selectedValues.length > 0) {
+          // Update multiple tasks (list view and selectedValues)
+          selectedValues.forEach((taskId) => {
+            if (updatedData[taskId]) {
+              const oldStatus = updatedData[taskId].status;
+              updatedData[taskId].status = newStatus;
+
+              logs.push({
+                activity: `You changed the status of task "${updatedData[taskId].title}" from "${oldStatus}" to "${newStatus}"`,
+                timeStamp: formatTimeStamp(new Date().toISOString()),
+              });
+            }
+          });
+          setSelectedValues([]); // Clear selected values
+        } else if (taskId) {
+          // Update a single task (either listView=false or fallback)
           if (updatedData[taskId]) {
             const oldStatus = updatedData[taskId].status;
             updatedData[taskId].status = newStatus;
@@ -356,9 +369,11 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
               activity: `You changed the status of task "${updatedData[taskId].title}" from "${oldStatus}" to "${newStatus}"`,
               timeStamp: formatTimeStamp(new Date().toISOString()),
             });
+          } else {
+            toast.error(`Task with ID "${taskId}" not found.`);
+            return;
           }
-        });
-
+        }
         // Update the database
         await update(dbRef, updatedData);
 
@@ -367,11 +382,9 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
           await push(logRef, log);
         }
 
-        // Update the local event log state
+        // Update local state
         setEventLog((prev) => [...prev, ...logs]);
 
-        // Clear selected values
-        setSelectedValues([]);
         toast.success("Task status updated successfully!");
       } else {
         toast.error("No tasks found in the database.");
@@ -409,8 +422,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const handleDeleteTask = async (selectedValues: string[]) => {
-    if (selectedValues.length === 0) {
+  const handleDeleteTask = async (selectedValues: string[], taskId: string) => {
+    if (listView && selectedValues.length === 0 && !taskId) {
       toast.error("No tasks selected for deletion.");
       return;
     }
@@ -432,26 +445,43 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       const failedTasks: string[] = [];
 
       // Iterate over selected values to delete
-      for (const taskId of selectedValues) {
-        if (existingData[taskId]) {
-          const title = existingData[taskId].title;
-          const taskRef = ref(db, `/main/tasks/${taskId}`);
+      if (listView && selectedValues.length > 0) {
+        for (const taskId of selectedValues) {
+          if (existingData[taskId]) {
+            const title = existingData[taskId].title;
+            const taskRef = ref(db, `/main/tasks/${taskId}`);
 
-          try {
-            await remove(taskRef);
-            deletedTasks.push(title);
+            try {
+              await remove(taskRef);
+              deletedTasks.push(title);
 
-            // Add deletion log
-            logs.push({
-              activity: `You deleted the task "${title}"`,
-              timeStamp: formatTimeStamp(new Date().toISOString()),
-            });
-          } catch (error) {
-            failedTasks.push(title);
-            console.error(`Error deleting task "${title}":`, error);
+              // Add deletion log
+              logs.push({
+                activity: `You deleted the task "${title}"`,
+                timeStamp: formatTimeStamp(new Date().toISOString()),
+              });
+            } catch (error) {
+              failedTasks.push(title);
+              console.error(`Error deleting task "${title}":`, error);
+            }
+          } else {
+            failedTasks.push(taskId);
           }
-        } else {
-          failedTasks.push(taskId);
+        }
+      } else if (taskId) {
+        const title = existingData[taskId].title;
+        const taskRef = ref(db, `/main/tasks/${taskId}`);
+        try {
+          await remove(taskRef);
+          deletedTasks.push(title);
+          // Add deletion log
+          logs.push({
+            activity: `You deleted the task "${title}"`,
+            timeStamp: formatTimeStamp(new Date().toISOString()),
+          });
+        } catch (error) {
+          failedTasks.push(title);
+          console.error(`Error deleting task "${title}":`, error);
         }
       }
 
@@ -514,10 +544,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setEditingTask,
         handleFindTask,
         sortDates,
-        activeCard,
-        setActiveCard,
-        activeStatus,
-        setActiveStatus,
         eventLog,
         setEventLog,
         selectedValues,
@@ -526,6 +552,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         clearTaskLog,
         attachments,
         setAttachments,
+        handleUpdateStatus,
       }}
     >
       {children}

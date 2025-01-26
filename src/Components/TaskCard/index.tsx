@@ -27,14 +27,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
     handleShowOptions,
     listView,
     handleCheckboxChange,
+    selectedValues,
   } = useAppContext();
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({
-      id: item.id,
+      id: item ? item.id : `empty-placeholder-${cardItem.status}`,
       data: {
-        type: "Card",
-        item: item,
+        item: item ? item : "empty-placeholder", // Pass the item or placeholder
+        status: cardItem.status, // Status of the card
       },
     });
 
@@ -44,7 +45,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
     borderRadius: isDragging && listView ? "8px" : "",
     boxShadow: isDragging ? "0px 4px 4px 0px #0000001a" : "none",
     zIndex: isDragging ? 2 : 0,
-    position: "relative",
   };
 
   const getStyleClass = (cardItem: cardItemType) => {
@@ -71,6 +71,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
               name={item.id}
               id={item.id}
               value={item.id}
+              checked={selectedValues.includes(item.id)}
               onChange={(e) => {
                 handleCheckboxChange(item.id, e.target.checked);
               }}
@@ -113,7 +114,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
           <div
             className={`${getStyleClass(
               cardItem
-            )} h-7 rounded-sm absolute top-2.5 left-1/2 translate-x-12 z-10 hidden md:inline`}
+            )} h-7 rounded-sm absolute top-2.5 left-1/2 translate-x-12 z-10 hidden md:inline lg:translate-x-32`}
             onClick={() => {
               handleShowOptions(id, "status");
             }}

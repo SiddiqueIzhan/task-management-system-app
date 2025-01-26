@@ -9,6 +9,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import AddTaskBar from "../AddTaskBar";
+import EmptyPlaceholder from "../EmptyPlaceHolder";
+import { useDndMonitor } from "@dnd-kit/core";
 
 interface CardContainerProps {
   cardItem: cardItemType;
@@ -18,6 +20,14 @@ interface CardContainerProps {
 const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
   const [hideList, setHideList] = useState(false);
   const [count, setCount] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Monitor drag events to determine if something is being dragged
+  useDndMonitor({
+    onDragStart: () => setIsDragging(true),
+    onDragEnd: () => setIsDragging(false),
+    onDragCancel: () => setIsDragging(false),
+  });
 
   const { getTaskData, searchItem, categoryItem, dateValue, listView } =
     useAppContext();
@@ -63,33 +73,44 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
               onClick={() => setHideList(!hideList)}
             />
           </div>
-          <div
-            className={`${styles.cardContainer} ${
-              !listView
-                ? `${styles.board}`
-                : `${styles.list} ${hideList ? `${styles.hideList}` : ``}`
-            }`}
+          <SortableContext
+            items={taskIds}
+            strategy={verticalListSortingStrategy}
           >
-            <AddTaskBar cardItem={cardItem} />
-            {count === 0 ? (
-              <span className={styles.noTasks}>
-                {cardItem.emptyPlaceHolder}
-              </span>
+            {isDragging && tasks.length === 0 ? (
+              <EmptyPlaceholder cardItem={cardItem} />
             ) : (
-              <SortableContext
-                items={taskIds}
-                strategy={verticalListSortingStrategy}
+              <div
+                className={`${styles.cardContainer} ${
+                  !listView
+                    ? `${styles.board}`
+                    : `${styles.list} ${hideList ? `${styles.hideList}` : ``}`
+                }`}
               >
-                {tasks?.map((item: tasksDataType, rowindex) => {
-                  return (
-                    <React.Fragment key={rowindex}>
-                      <TaskCard id={item.id} item={item} cardItem={cardItem} />
-                    </React.Fragment>
-                  );
-                })}
-              </SortableContext>
+                <AddTaskBar cardItem={cardItem} />
+
+                {count === 0 && !isDragging ? (
+                  <span className={styles.noTasks}>
+                    {cardItem.emptyPlaceHolder}
+                  </span>
+                ) : (
+                  <>
+                    {tasks?.map((item: tasksDataType, rowindex) => {
+                      return (
+                        <React.Fragment key={rowindex}>
+                          <TaskCard
+                            id={item.id}
+                            item={item}
+                            cardItem={cardItem}
+                          />
+                        </React.Fragment>
+                      );
+                    })}
+                  </>
+                )}
+              </div>
             )}
-          </div>
+          </SortableContext>
         </div>
       )}
     </>

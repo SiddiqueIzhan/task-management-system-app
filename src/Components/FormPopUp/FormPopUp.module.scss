@@ -2,7 +2,6 @@
   /* Equivalent to `w-1/2` */
   background-color: #ffffff; /* Equivalent to `bg-white` */
   border-radius: 20px; /* Equivalent to `rounded-[20px]` */
-  overflow: hidden;
 
   @media (max-width: 768px) {
     width: 100%;
@@ -37,10 +36,8 @@
 
   form {
     width: 100%;
-    min-height: 87.5%;
     position: relative;
     overflow-y: scroll;
-    // height: calc(100vh - 112px);
 
     .formSection {
       width: 100%;
@@ -48,9 +45,11 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      overflow-y: scroll;
+      padding-bottom: 85px;
 
       @media (max-width: 768px) {
-        padding-bottom: 115px;
+        height: 520px;
       }
 
       .inputSection {
@@ -66,7 +65,7 @@
         }
 
         &:nth-of-type(2) {
-          height: 123px;
+          min-height: 123px;
           position: relative;
 
           .top {
@@ -252,7 +251,8 @@
 
     .activitySection {
       width: 100%;
-      min-height: 110%;
+      height: 530px;
+      overflow-y: scroll;
       background: #f1f1f1;
       position: relative;
       bottom: 0px;
@@ -261,12 +261,27 @@
       flex-direction: column;
       gap: 6px;
       padding-top: 55px;
+      overflow-y: scroll;
+      padding-bottom: 70px;
+      border-bottom-right-radius: 20px;
 
       @media (max-width: 768px) {
         width: 100%;
         background: #fff;
         gap: 13px;
         padding-top: 12px;
+        height: 450px;
+        padding-bottom: 10px;
+      }
+
+      @media (min-width: 768px) and (max-width: 1024px) {
+        height: 285px;
+        padding-bottom: 10px;
+      }
+
+      @media (min-width: 1024px) and (max-width: 1280px) {
+        height: 460px;
+        // padding-bottom: 70px;
       }
 
       .header {
@@ -337,10 +352,12 @@
       position: absolute;
       bottom: 0px;
       border-top: 1px solid #e5e5e5;
+      border-radius: 0px 0px 20px 20px;
 
       @media (max-width: 768px) {
         position: fixed;
         bottom: 0px;
+        border-radius: 0px;
       }
 
       button {

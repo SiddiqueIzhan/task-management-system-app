@@ -46,6 +46,7 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
     validationSchema: ValidationSchema,
     onSubmit: (values, action) => {
       handleAddUpdateTask(values);
+      setOptPopUp(false);
       action.resetForm();
     },
   });
@@ -67,9 +68,9 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
 
   const getStyleClass = () => {
     if (isFormPopUp === "add") {
-      return "h-4/5 md:w-1/2 md:h-5/6";
+      return "h-4/5 md:w-[64vw] md:h-[58vh] lg:w-1/2 lg:h-[80vh] xl:w-1/2 xl:h-5/6";
     } else if (isFormPopUp === "edit") {
-      return "h-5/6 md:w-3/5 md:h-3/4";
+      return "h-[90vh] md:w-[95vw] md:h-1/2 lg:w-3/4 lg:h-[70vh] xl:w-3/5 xl:h-3/4";
     } else {
       return "";
     }
