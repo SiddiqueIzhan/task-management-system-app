@@ -38,6 +38,12 @@
     width: 100%;
     position: relative;
     overflow-y: scroll;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    // Hide scrollbar for Firefox
+    scrollbar-width: none;
 
     .formSection {
       width: 100%;
@@ -46,6 +52,13 @@
       flex-direction: column;
       gap: 12px;
       overflow-y: scroll;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      // Hide scrollbar for Firefox
+      scrollbar-width: none;
+
       padding-bottom: 85px;
 
       @media (max-width: 768px) {
@@ -251,7 +264,7 @@
 
     .activitySection {
       width: 100%;
-      height: 530px;
+      height: 486px;
       overflow-y: scroll;
       background: #f1f1f1;
       position: relative;
@@ -261,9 +274,13 @@
       flex-direction: column;
       gap: 6px;
       padding-top: 55px;
-      overflow-y: scroll;
       padding-bottom: 70px;
       border-bottom-right-radius: 20px;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      // Hide scrollbar for Firefox
+      scrollbar-width: none;
 
       @media (max-width: 768px) {
         width: 100%;
@@ -275,7 +292,7 @@
       }
 
       @media (min-width: 768px) and (max-width: 1024px) {
-        height: 285px;
+        height: 385px;
         padding-bottom: 10px;
       }
 
