@@ -59,9 +59,7 @@ const FormSection = ({
   return (
     <div
       className={`${styles.formSection} ${
-        isFormPopUp === "add"
-          ? "md:h-[403px] lg:h-[528px]"
-          : "md:h-[446px] lg:h-[486px]"
+        isFormPopUp === "add" ? "form-add" : "form-edit"
       }`}
     >
       <div

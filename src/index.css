@@ -74,3 +74,31 @@
     display: none;
   }
 }
+
+.form-add {
+  @media (min-width: 768px) {
+    height: 326px;
+  }
+
+  @media (min-width: 1024px) {
+    height: 431px;
+  }
+
+  @media (min-width: 1280px) {
+    height: 479px;
+  }
+}
+
+.form-edit {
+  @media (min-width: 768px) {
+    height: 446px;
+  }
+
+  @media (min-width: 1024px) {
+    height: 486px;
+  }
+
+  @media (min-width: 1280px) {
+    height: 500px;
+  }
+}

@@ -68,7 +68,7 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
 
   const getStyleClass = () => {
     if (isFormPopUp === "add") {
-      return "h-4/5 md:w-[64vw] md:h-[58vh] lg:w-1/2 lg:h-[80vh] xl:w-1/2 xl:h-5/6";
+      return "h-4/5 md:w-[64vw] md:h-[55vh] lg:w-1/2 lg:h-[70vh] xl:w-1/2 xl:h-[76vh]";
     } else if (isFormPopUp === "edit") {
       return "h-[90vh] md:w-[75vw] md:h-[70vh] lg:w-3/4 lg:h-[70vh] xl:w-3/5 xl:h-3/4";
     } else {

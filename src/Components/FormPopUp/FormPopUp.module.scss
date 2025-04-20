@@ -58,12 +58,7 @@
 
       // Hide scrollbar for Firefox
       scrollbar-width: none;
-
       padding-bottom: 85px;
-
-      @media (max-width: 768px) {
-        height: 520px;
-      }
 
       .inputSection {
         width: 100%;
