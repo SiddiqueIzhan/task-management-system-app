@@ -23,11 +23,11 @@ const Login = () => {
         </p>
         <button
           onClick={signInWithGoogle}
-          className="w-11/12 md:w-full h-12 md:h-[60px] rounded-[18px] bg-[#292929] flex items-center justify-center mt-[31px] hover:bg-white duration-500 hover:border-black hover:border-2"
+          className="w-11/12 md:w-full h-12 md:h-[60px] rounded-[18px] bg-[#292929] flex items-center justify-center mt-[31px] duration-200 hover:border-yellow-500 hover:border-2"
         >
           <div className="flex items-center gap-3">
             <img src="/Images/google.svg" alt="google" />
-            <span className="text-base text-white md:text-2xl font-bold hover:text-black cursor-pointer">
+            <span className="text-base text-white md:text-2xl font-bold cursor-pointer">
               Continue with Google
             </span>
           </div>
@@ -46,7 +46,7 @@ const Login = () => {
       <img
         src="/Images/mobile_bg_onboard.svg"
         alt="circles"
-        className="block md:hidden absolute top-0 left-0"
+        className="w-screen h-screen block md:hidden absolute top-0 left-0"
       />
     </div>
   );

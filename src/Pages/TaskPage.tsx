@@ -62,9 +62,9 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
       <Header user={user} />
       <div className="w-full min-h-[65vh] flex flex-col mt-20 md:mt-[34px]">
         {searchItem && !taskData.length ? (
-          <div className="w-[430px] m-auto flex flex-col items-center">
+          <div className="md:w-[430px] m-auto flex flex-col items-center w-[230px]">
             <img src="./Images/SearchNotFound.svg" alt="emptyholder" />
-            <span className="font-bold text-[#2F2F2F] text-2xl text-center">
+            <span className="font-bold text-[#2F2F2F] md:text-2xl text-center text-lg">
               It looks like we can't find any results that match.
             </span>
           </div>

@@ -51,7 +51,9 @@ const FilterOptions = () => {
           }}
         >
           <span>
-            {dateValueFilter ? dateValueFilter.toLocaleString().slice(0, 10) : "Due Date"}
+            {dateValueFilter
+              ? dateValueFilter.toLocaleString().slice(0, 10)
+              : "Due Date"}
           </span>
           <FaAngleDown
             className={
