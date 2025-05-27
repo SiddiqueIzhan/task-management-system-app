@@ -1,5 +1,4 @@
 import { signOut, User } from "firebase/auth";
-import { auth } from "../../Pages/login";
 import { PiNotepad } from "react-icons/pi";
 import { BiLogOut } from "react-icons/bi";
 import { IoIosSearch, IoMdClose } from "react-icons/io";
@@ -9,6 +8,7 @@ import { useAppContext } from "../../Context/appContext";
 import FormPopUp from "../FormPopUp";
 import Tabs from "../Tabs";
 import { ViewData } from "../data";
+import { auth } from "../../Config/firebase";
 
 interface headerProps {
   user: User;

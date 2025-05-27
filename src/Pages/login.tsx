@@ -1,13 +1,5 @@
-import { app } from "../Config/firebase";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithGoogle } from "../Config/firebase";
 import { PiNotepad } from "react-icons/pi";
-
-export const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-const signInWithGoogle = () => {
-  signInWithPopup(auth, provider);
-};
 
 const Login = () => {
   return (

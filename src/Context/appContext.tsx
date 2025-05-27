@@ -14,7 +14,7 @@ import {
   tasksDataType,
   Value,
 } from "../Utils/types";
-import { db } from "../Config/firebase";
+import { auth, db } from "../Config/firebase";
 import {
   child,
   get,
@@ -28,7 +28,6 @@ import {
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "../Pages/login";
 
 interface contextProps {
   taskData: tasksDataType[];
@@ -199,7 +198,10 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getTaskLogs = () => {
-    const logsRef = child(ref(db), `/main/${user?.providerData[0].uid}/tasks/logs`);
+    const logsRef = child(
+      ref(db),
+      `/main/${user?.providerData[0].uid}/tasks/logs`
+    );
 
     onValue(
       logsRef,
@@ -324,7 +326,9 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }, {});
 
         // Save the updated tasks back to Firebase
-        await update(ref(db, `/main/${user?.providerData[0].uid}`), { tasks: dataToSave });
+        await update(ref(db, `/main/${user?.providerData[0].uid}`), {
+          tasks: dataToSave,
+        });
 
         // Add log entry
         const newLogEntry = {
@@ -471,7 +475,10 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         for (const taskId of selectedValues) {
           if (existingData[taskId]) {
             const title = existingData[taskId].title;
-            const taskRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/${taskId}`);
+            const taskRef = ref(
+              db,
+              `/main/${user?.providerData[0].uid}/tasks/${taskId}`
+            );
 
             try {
               await remove(taskRef);
@@ -492,7 +499,10 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } else if (taskId) {
         const title = existingData[taskId].title;
-        const taskRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/${taskId}`);
+        const taskRef = ref(
+          db,
+          `/main/${user?.providerData[0].uid}/tasks/${taskId}`
+        );
         try {
           await remove(taskRef);
           deletedTasks.push(title);
