@@ -175,7 +175,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getTaskData = () => {
-    const dbRef = child(ref(db), `/main/${user?.uid}/tasks`);
+    const dbRef = child(ref(db), `/main/${user?.providerData[0].uid}/tasks`);
 
     onValue(
       dbRef,
@@ -199,7 +199,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getTaskLogs = () => {
-    const logsRef = child(ref(db), `/main/${user?.uid}/tasks/logs`);
+    const logsRef = child(ref(db), `/main/${user?.providerData[0].uid}/tasks/logs`);
 
     onValue(
       logsRef,
@@ -230,7 +230,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const clearTaskLog = async () => {
     try {
-      const logsRef = ref(db, `/main/${user?.uid}/tasks/logs`); // Path to task logs in Firebase
+      const logsRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/logs`); // Path to task logs in Firebase
 
       // Remove all data in the logs path
       await remove(logsRef);
@@ -278,8 +278,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error("Task contains undefined values.");
       }
 
-      const dbRef = ref(db, `/main/${user?.uid}/tasks`);
-      const logRef = ref(db, `/main/${user?.uid}/tasks/logs`);
+      const dbRef = ref(db, `/main/${user?.providerData[0].uid}/tasks`);
+      const logRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/logs`);
       const snapshot = await get(dbRef);
       const existingData = snapshot.val() || {}; // Fetch existing tasks (default to an empty object)
 
@@ -324,7 +324,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }, {});
 
         // Save the updated tasks back to Firebase
-        await update(ref(db, `/main/${user?.uid}`), { tasks: dataToSave });
+        await update(ref(db, `/main/${user?.providerData[0].uid}`), { tasks: dataToSave });
 
         // Add log entry
         const newLogEntry = {
@@ -357,8 +357,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      const dbRef = ref(db, `/main/${user?.uid}/tasks`);
-      const logRef = ref(db, `/main/${user?.uid}/tasks/logs`);
+      const dbRef = ref(db, `/main/${user?.providerData[0].uid}/tasks`);
+      const logRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/logs`);
       const snapshot = await get(dbRef);
       const existingData = snapshot.val();
 
@@ -451,8 +451,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      const dbRef = ref(db, `/main/${user?.uid}/tasks`);
-      const logRef = ref(db, `/main/${user?.uid}/tasks/logs`);
+      const dbRef = ref(db, `/main/${user?.providerData[0].uid}/tasks`);
+      const logRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/logs`);
 
       const snapshot = await get(dbRef);
       const existingData = snapshot.val();
@@ -471,7 +471,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         for (const taskId of selectedValues) {
           if (existingData[taskId]) {
             const title = existingData[taskId].title;
-            const taskRef = ref(db, `/main/${user?.uid}/tasks/${taskId}`);
+            const taskRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/${taskId}`);
 
             try {
               await remove(taskRef);
@@ -492,7 +492,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } else if (taskId) {
         const title = existingData[taskId].title;
-        const taskRef = ref(db, `/main/${user?.uid}/tasks/${taskId}`);
+        const taskRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/${taskId}`);
         try {
           await remove(taskRef);
           deletedTasks.push(title);
