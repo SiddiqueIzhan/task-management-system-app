@@ -95,15 +95,14 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
                   </span>
                 ) : (
                   <>
-                    {tasks?.map((item: tasksDataType, rowindex) => {
+                    {tasks?.map((item: tasksDataType) => {
                       return (
-                        <React.Fragment key={rowindex}>
-                          <TaskCard
-                            id={item.id}
-                            item={item}
-                            cardItem={cardItem}
-                          />
-                        </React.Fragment>
+                        <TaskCard
+                          key={item.id}
+                          id={item.id}
+                          item={item}
+                          cardItem={cardItem}
+                        />
                       );
                     })}
                   </>

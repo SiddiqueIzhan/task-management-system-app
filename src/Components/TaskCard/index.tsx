@@ -83,10 +83,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
           </span>
         )}
         <div {...listeners} className={styles.taskElements}>
-          {listColumns.map((column: listColumnsType, colIndex) => (
-            <>
+          {listColumns.map((column: listColumnsType) => (
+            <React.Fragment key={column.dataField}>
               <span
-                key={colIndex}
                 className={`${styles.taskColumn} ${
                   !listView ? styles.boardColumn : ""
                 }`}
@@ -95,7 +94,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
                   {item[column.dataField]}
                 </span>
               </span>
-            </>
+            </React.Fragment>
           ))}
         </div>
         <SlOptions

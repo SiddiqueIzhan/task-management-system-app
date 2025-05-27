@@ -40,7 +40,6 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
   useEffect(() => {
     setOptPopUp(false);
   }, [addingTask]);
-  console.log(dateValueAdd);
   return (
     <>
       {cardItem.status === "TO-DO" && listView && (

@@ -27,6 +27,8 @@ import {
 } from "firebase/database";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "../Pages/login";
 
 interface contextProps {
   taskData: tasksDataType[];
@@ -84,6 +86,7 @@ interface contextProps {
   addingTask: tasksDataType | null;
   setAddingTask: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
   handleAddTask: (key: string, value: string) => void;
+  user: User | null;
 }
 
 const appContext = createContext<contextProps | undefined>(undefined);
@@ -110,6 +113,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   >([]);
   const [eventType, setEventType] = useState<EventType>(null);
   const [addingTask, setAddingTask] = useState<tasksDataType | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const sortDates = (order: "asc" | "desc") => {
     const dateArray = taskData.map((task) => task.due_date);
@@ -144,6 +148,14 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [popupRef]);
 
+  useEffect(() => {
+    onAuthStateChanged(auth, (userD) => {
+      if (userD) {
+        setUser(userD);
+      } else setUser(null);
+    });
+  }, []);
+
   const filterTasks = (data: tasksDataType[]) => {
     return data?.filter((item) => {
       const matchesSearch = searchItem
@@ -163,7 +175,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getTaskData = () => {
-    const dbRef = child(ref(db), "/main/tasks");
+    const dbRef = child(ref(db), `/main/${user?.uid}/tasks`);
 
     onValue(
       dbRef,
@@ -187,7 +199,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getTaskLogs = () => {
-    const logsRef = child(ref(db), "/main/tasks/logs");
+    const logsRef = child(ref(db), `/main/${user?.uid}/tasks/logs`);
 
     onValue(
       logsRef,
@@ -218,7 +230,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const clearTaskLog = async () => {
     try {
-      const logsRef = ref(db, "/main/tasks/logs"); // Path to task logs in Firebase
+      const logsRef = ref(db, `/main/${user?.uid}/tasks/logs`); // Path to task logs in Firebase
 
       // Remove all data in the logs path
       await remove(logsRef);
@@ -266,8 +278,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error("Task contains undefined values.");
       }
 
-      const dbRef = ref(db, "/main/tasks");
-      const logRef = ref(db, "/main/tasks/logs");
+      const dbRef = ref(db, `/main/${user?.uid}/tasks`);
+      const logRef = ref(db, `/main/${user?.uid}/tasks/logs`);
       const snapshot = await get(dbRef);
       const existingData = snapshot.val() || {}; // Fetch existing tasks (default to an empty object)
 
@@ -312,7 +324,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }, {});
 
         // Save the updated tasks back to Firebase
-        await update(ref(db, "/main"), { tasks: dataToSave });
+        await update(ref(db, `/main/${user?.uid}`), { tasks: dataToSave });
 
         // Add log entry
         const newLogEntry = {
@@ -345,8 +357,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      const dbRef = ref(db, "/main/tasks");
-      const logRef = ref(db, "/main/tasks/logs");
+      const dbRef = ref(db, `/main/${user?.uid}/tasks`);
+      const logRef = ref(db, `/main/${user?.uid}/tasks/logs`);
       const snapshot = await get(dbRef);
       const existingData = snapshot.val();
 
@@ -439,8 +451,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      const dbRef = ref(db, "/main/tasks");
-      const logRef = ref(db, "/main/tasks/logs");
+      const dbRef = ref(db, `/main/${user?.uid}/tasks`);
+      const logRef = ref(db, `/main/${user?.uid}/tasks/logs`);
 
       const snapshot = await get(dbRef);
       const existingData = snapshot.val();
@@ -459,7 +471,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         for (const taskId of selectedValues) {
           if (existingData[taskId]) {
             const title = existingData[taskId].title;
-            const taskRef = ref(db, `/main/tasks/${taskId}`);
+            const taskRef = ref(db, `/main/${user?.uid}/tasks/${taskId}`);
 
             try {
               await remove(taskRef);
@@ -480,7 +492,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } else if (taskId) {
         const title = existingData[taskId].title;
-        const taskRef = ref(db, `/main/tasks/${taskId}`);
+        const taskRef = ref(db, `/main/${user?.uid}/tasks/${taskId}`);
         try {
           await remove(taskRef);
           deletedTasks.push(title);
@@ -583,6 +595,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         handleAddTask,
         dateValueAdd,
         onChangeDateAdd,
+        user,
       }}
     >
       {children}

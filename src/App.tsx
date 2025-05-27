@@ -1,28 +1,13 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-import Login, { auth } from "./Pages/login";
+import { useAppContext } from "./Context/appContext";
+import Login from "./Pages/login";
 import TaskPage from "./Pages/TaskPage";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { ContextProvider } from "./Context/appContext";
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (userD) => {
-      if (userD) {
-        setUser(userD);
-      } else setUser(null);
-    });
-  }, []);
-
+  const { user } = useAppContext();
   if (user === null) return <Login />;
 
-  return (
-    <ContextProvider>
-      <TaskPage user={user} />
-    </ContextProvider>
-  );
+  return <TaskPage user={user} />;
 }
 
 export default App;

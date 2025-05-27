@@ -8,6 +8,7 @@ import { FaCaretUp } from "react-icons/fa";
 import { closestCorners, DndContext, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { tasksDataType } from "../Utils/types";
+import React from "react";
 
 interface userPageProps {
   user: User;
@@ -103,10 +104,10 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
                   !listView ? "flex-row" : "flex-col"
                 }`}
               >
-                {cardDetails.map((cardItem, cardIndex) => (
+                {cardDetails.map((cardItem) => (
                   <CardContainer
                     cardItem={cardItem}
-                    key={cardIndex}
+                    key={cardItem.status}
                     tasks={taskData.filter(
                       (task) => task.status === cardItem.status
                     )}
