@@ -29,8 +29,14 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
     onDragCancel: () => setIsDragging(false),
   });
 
-  const { getTaskData, searchItem, categoryItem, dateValueFilter, listView } =
-    useAppContext();
+  const {
+    getTaskData,
+    searchItem,
+    categoryItem,
+    dateValueFilter,
+    listView,
+    tasksLoading,
+  } = useAppContext();
 
   useEffect(() => {
     getTaskData();
@@ -88,8 +94,12 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardItem, tasks }) => {
                 }`}
               >
                 <AddTaskBar cardItem={cardItem} />
-
-                {count === 0 && !isDragging ? (
+                {tasksLoading && (
+                  <div className="w-full h-[160px] absolute flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-gray-500 border-dotted rounded-full animate-spin"></div>
+                  </div>
+                )}
+                {count === 0 && !tasksLoading && !isDragging ? (
                   <span className={styles.noTasks}>
                     {cardItem.emptyPlaceHolder}
                   </span>

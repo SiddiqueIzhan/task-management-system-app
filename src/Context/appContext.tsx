@@ -86,6 +86,8 @@ interface contextProps {
   setAddingTask: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
   handleAddTask: (key: string, value: string) => void;
   user: User | null;
+  authLoading: boolean;
+  tasksLoading: boolean;
 }
 
 const appContext = createContext<contextProps | undefined>(undefined);
@@ -113,6 +115,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [eventType, setEventType] = useState<EventType>(null);
   const [addingTask, setAddingTask] = useState<tasksDataType | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [tasksLoading, setTasksLoading] = useState<boolean>(true);
 
   const sortDates = (order: "asc" | "desc") => {
     const dateArray = taskData.map((task) => task.due_date);
@@ -135,7 +139,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      setFormPopUp(null);
+      // setFormPopUp(null);
       setOptPopUp(false);
       setOptionType(null);
       setEditingTask(null);
@@ -151,6 +155,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     onAuthStateChanged(auth, (userD) => {
       if (userD) {
         setUser(userD);
+        setAuthLoading(false);
       } else setUser(null);
     });
   }, []);
@@ -181,6 +186,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       (snapshot) => {
         const data = snapshot.val();
         if (data) {
+          setTasksLoading(false);
           const dataArray: tasksDataType[] = Object.keys(data).map((key) => ({
             id: key,
             ...data[key],
@@ -546,7 +552,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleAddTask = (key: string, value: string) => {
-    console.log(key, value);
     setAddingTask((prevTask) => {
       // Ensure the state always returns a valid tasksDataType object
       const updatedTask = {
@@ -566,7 +571,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         listView,
         setListView,
         getTaskData,
-
         handleAddUpdateTask,
         isFormPopUp,
         setFormPopUp,
@@ -606,6 +610,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         dateValueAdd,
         onChangeDateAdd,
         user,
+        authLoading,
+        tasksLoading,
       }}
     >
       {children}

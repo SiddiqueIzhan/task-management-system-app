@@ -7,7 +7,7 @@ const TaskLogSection = () => {
 
   useEffect(() => {
     getTaskLogs();
-  }, [eventLog]);
+  }, []);
 
   return (
     <div className={styles.activitySection}>

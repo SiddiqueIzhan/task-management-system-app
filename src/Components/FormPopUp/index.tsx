@@ -9,6 +9,7 @@ import { useAppContext } from "../../Context/appContext";
 import Tabs from "../Tabs";
 import FormSection from "../FormSection";
 import TaskLogSection from "../TaskLogSection";
+import { format } from "date-fns";
 
 interface FormPopUpProps {
   setFormPopUp: (FormPopUp: EventType) => void;
@@ -27,11 +28,23 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
 
   const {
     isFormPopUp,
+    addingTask,
     editingTask,
     handleAddUpdateTask,
     setOptPopUp,
     clearTaskLog,
+    dateValueAdd,
   } = useAppContext();
+
+  const formik = useFormik({
+    initialValues: initialValues,
+    validationSchema: ValidationSchema,
+    onSubmit: (values, action) => {
+      handleAddUpdateTask(values);
+      setOptPopUp(false);
+      action.resetForm();
+    },
+  });
 
   const {
     values,
@@ -41,15 +54,25 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
     handleBlur,
     handleChange,
     handleSubmit,
-  } = useFormik({
-    initialValues: initialValues,
-    validationSchema: ValidationSchema,
-    onSubmit: (values, action) => {
-      handleAddUpdateTask(values);
-      setOptPopUp(false);
-      action.resetForm();
-    },
-  });
+  } = formik;
+
+  useEffect(() => {
+    if (dateValueAdd) {
+      setValues((prev) => ({
+        ...prev,
+        due_date: format(dateValueAdd?.toString(), "yyyy-MM-dd"),
+      }));
+    }
+  }, [dateValueAdd]);
+
+  useEffect(() => {
+    if (addingTask?.status) {
+      setValues((prev) => ({
+        ...prev,
+        status: addingTask.status,
+      }));
+    }
+  }, [addingTask?.status]);
 
   useEffect(() => {
     if (editingTask) {
@@ -62,7 +85,13 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
         status: editingTask.status,
       });
     }
-  }, [editingTask]);
+  }, [editingTask?.id]);
+
+  useEffect(() => {
+    if (isFormPopUp === "add") {
+      formik.resetForm();
+    }
+  }, [isFormPopUp]);
 
   const [showForm, setShowForm] = useState(true);
 
@@ -152,8 +181,8 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
               <button
                 type="button"
                 onClick={() => {
-                  setFormPopUp(null);
                   setOptPopUp(false);
+                  setFormPopUp(null);
                 }}
               >
                 CANCEL

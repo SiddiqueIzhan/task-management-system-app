@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import styles from "../FormPopUp/FormPopUp.module.scss";
 import {
   RiBold,
@@ -10,6 +10,10 @@ import { TbItalic } from "react-icons/tb";
 import { tasksDataType } from "../../Utils/types";
 import { FormikErrors, FormikTouched } from "formik";
 import { useAppContext } from "../../Context/appContext";
+import { LuCalendarRange } from "react-icons/lu";
+import OptionsPopUp from "../OptionPopUp/optionsPopUp";
+import { FaAngleDown } from "react-icons/fa6";
+import { statusOptions } from "../data";
 
 interface FormSectionProps {
   values: tasksDataType;
@@ -36,7 +40,23 @@ const FormSection = ({
   handleChange,
   handleBlur,
 }: FormSectionProps) => {
-  const { attachments, setAttachments, isFormPopUp } = useAppContext();
+  const {
+    attachments,
+    setAttachments,
+    isFormPopUp,
+    isOptPopUp,
+    optionType,
+    eventType,
+    setEventType,
+    handleShowOptions,
+  } = useAppContext();
+
+  const popUpType = useMemo(() => {
+    if (isFormPopUp === "add") return "add";
+    else if (isFormPopUp === "edit") return "edit";
+    else return null;
+  }, [isFormPopUp]);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;
 
@@ -74,6 +94,7 @@ const FormSection = ({
           value={values.title}
           onChange={handleChange}
           onBlur={handleBlur}
+          autoComplete="off"
         />
       </div>
       {errors.title && touched.title && (
@@ -151,13 +172,27 @@ const FormSection = ({
             }`}
           >
             <input
-              type="date"
+              type="text"
               name="due_date"
               className=""
+              placeholder="dd-mm-yyyy"
               value={values.due_date}
               onChange={handleChange}
               onBlur={handleBlur}
+              autoComplete="off"
+              readOnly
             />
+            <LuCalendarRange
+              onClick={() => {
+                setEventType(popUpType);
+                handleShowOptions("0", "calendar");
+              }}
+            />
+            {isOptPopUp &&
+              optionType === "calendar" &&
+              (eventType === "add" || eventType === "edit") && (
+                <OptionsPopUp event={eventType} />
+              )}
           </div>
           {errors.due_date && touched.due_date && (
             <p className="text-[10px] text-red-600">{errors.due_date}</p>
@@ -170,18 +205,35 @@ const FormSection = ({
               errors.status && touched.status && `${styles.error}`
             }`}
           >
-            <select
+            <input
+              type="text"
               name="status"
               className=""
+              placeholder="Select Status"
               value={values.status}
               onChange={handleChange}
               onBlur={handleBlur}
-            >
-              <option value="">Choose</option>
-              <option value="TO-DO">TO-DO</option>
-              <option value="IN-PROGRESS">IN-PROGRESS</option>
-              <option value="COMPLETED">COMPLETED</option>
-            </select>
+              autoComplete="off"
+              readOnly
+            />
+            <FaAngleDown
+              className={
+                isOptPopUp ? "rotate-180 duration-500" : "duration-500"
+              }
+              onClick={() => {
+                setEventType(popUpType);
+                handleShowOptions("0", "status");
+              }}
+            />
+            {isOptPopUp &&
+              optionType === "status" &&
+              (eventType === "add" || eventType === "edit") && (
+                <OptionsPopUp
+                  options={statusOptions}
+                  className={"absolute -top-28 md:top-10 right-0 gap-[13px]"}
+                  event={eventType}
+                />
+              )}
           </div>
           {errors.status && touched.status && (
             <p className="text-[10px] text-red-600">{errors.status}</p>

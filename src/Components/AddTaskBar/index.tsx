@@ -48,7 +48,7 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
             <div className={styles.taskColumn}>
               <span
                 className="flex items-center"
-                onClick={() => setShowAddTaskbar(!showAddTaskBar)}
+                onClick={() => setShowAddTaskbar(true)}
               >
                 <IoMdAdd className="text-[#7B1984] mr-1" />
                 ADD TASK
@@ -78,7 +78,7 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                   >
                     <LuCalendarRange />
                     {dateValueAdd
-                      ? dateValueAdd.toLocaleString().slice(0, 10)
+                      ? dateValueAdd.toLocaleString().split(",")[0]
                       : "Add Date"}
                   </span>
                   {isOptPopUp &&
@@ -149,6 +149,7 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                         onChangeDateAdd(null);
                         setAddingTask(null); // reset adding task
                         setAddingTask(null);
+                        setShowAddTaskbar(false);
                       }}
                     >
                       CANCEL

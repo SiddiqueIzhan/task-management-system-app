@@ -100,7 +100,7 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
               collisionDetection={closestCorners}
             >
               <div
-                className={`flex gap-5 md:gap-8 ${
+                className={`w-full min-h-[68vh] flex gap-5 md:gap-8 ${
                   !listView ? "flex-row" : "flex-col"
                 }`}
               >

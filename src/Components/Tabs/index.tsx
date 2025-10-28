@@ -21,23 +21,6 @@ const Tabs = ({
     <div
       className={`${styles.toggleContainer} ${isPopUp && styles.togglePopUp}`}
     >
-      {/* {data.map(({ show, icon }, index) => {
-        const IconComponent = icon;
-        return (
-          <div
-            key={index}
-            className={`${styles.toggleOption} ${activeTab && styles.active} `}
-            onClick={() => setActiveTab(!activeTab)}
-          >
-            {IconComponent && (
-              <span className={styles.icon}>
-                <IconComponent />
-              </span>
-            )}
-            <span className={styles.type}>{show}</span>
-          </div>
-        );
-      })} */}
       <div
         className={`${styles.toggleOption} ${activeTab && styles.active} `}
         onClick={() => setActiveTab(true)}

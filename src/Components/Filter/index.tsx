@@ -52,7 +52,7 @@ const FilterOptions = () => {
         >
           <span>
             {dateValueFilter
-              ? dateValueFilter.toLocaleString().slice(0, 10)
+              ? dateValueFilter.toLocaleString().split(",")[0]
               : "Due Date"}
           </span>
           <FaAngleDown
@@ -71,10 +71,10 @@ const FilterOptions = () => {
           onClick={() => {
             onChangeDateFilter(null);
             setCategoryItem(null);
-            toast.success("Reset Successful");
+            toast.success("Clear Successful");
           }}
         >
-          RESET
+          CLEAR
         </span>
       </div>
     </div>
