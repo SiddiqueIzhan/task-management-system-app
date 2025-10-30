@@ -5,7 +5,6 @@ import { IoIosSearch, IoMdClose } from "react-icons/io";
 import "react-calendar/dist/Calendar.css";
 import FilterOptions from "../Filter";
 import { useAppContext } from "../../Context/appContext";
-import FormPopUp from "../FormPopUp";
 import Tabs from "../Tabs";
 import { ViewData } from "../data";
 import { auth } from "../../Config/firebase";
@@ -16,9 +15,7 @@ interface headerProps {
 
 const Header: React.FC<headerProps> = ({ user }) => {
   const {
-    isFormPopUp,
     setFormPopUp,
-    popupRef,
     searchItem,
     setSearchItem,
     listView,
@@ -87,9 +84,6 @@ const Header: React.FC<headerProps> = ({ user }) => {
           >
             ADD TASK
           </button>
-          {isFormPopUp === "add" && (
-            <FormPopUp setFormPopUp={setFormPopUp} popupRef={popupRef} />
-          )}
         </div>
       </div>
     </>

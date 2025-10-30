@@ -1,7 +1,6 @@
 import { useAppContext } from "../../Context/appContext";
 import { EventType, optionsType } from "../../Utils/types";
 import CalendarComp from "../CalendarComp";
-import FormPopUp from "../FormPopUp";
 
 interface OptionsPopUpProps {
   options?: optionsType[];
@@ -22,7 +21,6 @@ const OptionsPopUp: React.FC<OptionsPopUpProps> = ({
     optionType,
     onChangeDateFilter,
     dateValueFilter,
-    isFormPopUp,
     setFormPopUp,
     setCategoryItem,
     handleFindTask,
@@ -54,9 +52,7 @@ const OptionsPopUp: React.FC<OptionsPopUpProps> = ({
       opt === "IN-PROGRESS" ||
       opt === "COMPLETED"
     ) {
-      if (event === "edit") {
-        handleFindTask(activeIndex as string, opt); // Wait for the task to be found
-      } else if (event === "add") {
+      if (event === "edit" || event === "add") {
         handleAddTask("status", opt);
       }
     }
@@ -76,7 +72,7 @@ const OptionsPopUp: React.FC<OptionsPopUpProps> = ({
               onChangeDate={onChangeDateFilter}
             />
           )}
-          {event === "add" && (
+          {(event === "add" || event === "edit") && (
             <CalendarComp
               dateValue={dateValueAdd}
               onChangeDate={onChangeDateAdd}
@@ -104,9 +100,6 @@ const OptionsPopUp: React.FC<OptionsPopUpProps> = ({
               </span>
             );
           })}
-          {isFormPopUp === "edit" && (
-            <FormPopUp setFormPopUp={setFormPopUp} popupRef={popupRef} />
-          )}
         </>
       )}
     </div>

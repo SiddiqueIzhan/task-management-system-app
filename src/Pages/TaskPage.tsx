@@ -9,6 +9,7 @@ import { closestCorners, DndContext, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { tasksDataType } from "../Utils/types";
 import React from "react";
+import FormPopUp from "../Components/FormPopUp";
 
 interface userPageProps {
   user: User;
@@ -24,6 +25,9 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
     sortDates,
     listView,
     handleUpdateStatus,
+    isFormPopUp,
+    setFormPopUp,
+    popupRef,
   } = useAppContext();
 
   const handleDragOver = (event: DragEndEvent) => {
@@ -118,6 +122,9 @@ const TaskPage: React.FC<userPageProps> = ({ user }) => {
           </>
         )}
       </div>
+      {isFormPopUp && (
+        <FormPopUp setFormPopUp={setFormPopUp} popupRef={popupRef} />
+      )}
       <ToastContainer />
     </div>
   );

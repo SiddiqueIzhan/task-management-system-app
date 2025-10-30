@@ -28,8 +28,8 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
 
   const {
     isFormPopUp,
-    addingTask,
-    editingTask,
+    tempTaskState,
+    // editingTask,
     handleAddUpdateTask,
     setOptPopUp,
     clearTaskLog,
@@ -58,6 +58,7 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
 
   useEffect(() => {
     if (dateValueAdd) {
+      setOptPopUp(false);
       setValues((prev) => ({
         ...prev,
         due_date: format(dateValueAdd?.toString(), "yyyy-MM-dd"),
@@ -66,32 +67,33 @@ const FormPopUp: React.FC<FormPopUpProps> = ({ setFormPopUp, popupRef }) => {
   }, [dateValueAdd]);
 
   useEffect(() => {
-    if (addingTask?.status) {
+    if (tempTaskState?.status) {
+      setOptPopUp(false);
       setValues((prev) => ({
         ...prev,
-        status: addingTask.status,
+        status: tempTaskState.status,
       }));
     }
-  }, [addingTask?.status]);
+  }, [tempTaskState?.status]);
 
   useEffect(() => {
-    if (editingTask) {
+    if (isFormPopUp === "edit" && tempTaskState) {
       setValues({
-        id: editingTask.id,
-        title: editingTask.title,
-        description: editingTask.description,
-        category: editingTask.category,
-        due_date: editingTask.due_date,
-        status: editingTask.status,
+        id: tempTaskState.id,
+        title: tempTaskState.title,
+        description: tempTaskState.description,
+        category: tempTaskState.category,
+        due_date: tempTaskState.due_date,
+        status: tempTaskState.status,
       });
     }
-  }, [editingTask?.id]);
+  }, [tempTaskState?.id]);
 
   useEffect(() => {
     if (isFormPopUp === "add") {
       formik.resetForm();
     }
-  }, [isFormPopUp]);
+  }, []);
 
   const [showForm, setShowForm] = useState(true);
 

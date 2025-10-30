@@ -5,7 +5,7 @@ import Login from "./Pages/login";
 import TaskPage from "./Pages/TaskPage";
 
 function App() {
-  const { user, authLoading } = useAppContext();
+  const { user, authLoading} = useAppContext();
 
   if (authLoading) return <Loading />;
 

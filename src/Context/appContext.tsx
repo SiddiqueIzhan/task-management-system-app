@@ -55,8 +55,6 @@ interface contextProps {
   setSearchItem: (searchItem: string) => void;
   categoryItem: filterType;
   setCategoryItem: React.Dispatch<React.SetStateAction<filterType>>;
-  editingTask: tasksDataType | null;
-  setEditingTask: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
   handleFindTask: (taskId: string, newStatus?: string) => void;
   sortDates: (order: "asc" | "desc") => void;
   eventLog: eventLogType[];
@@ -82,8 +80,8 @@ interface contextProps {
   handleUpdateStatus: (newStatus: string, taskId?: string) => Promise<void>;
   eventType: EventType;
   setEventType: (eventType: EventType) => void;
-  addingTask: tasksDataType | null;
-  setAddingTask: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
+  tempTaskState: tasksDataType | null;
+  setTempTaskState: React.Dispatch<React.SetStateAction<tasksDataType | null>>;
   handleAddTask: (key: string, value: string) => void;
   user: User | null;
   authLoading: boolean;
@@ -106,14 +104,15 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [dateValueAdd, onChangeDateAdd] = useState<Value>(null);
   const [searchItem, setSearchItem] = useState("");
   const [categoryItem, setCategoryItem] = useState<filterType>(null);
-  const [editingTask, setEditingTask] = useState<tasksDataType | null>(null);
   const [eventLog, setEventLog] = useState<eventLogType[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<
     { id: string; file: File; preview: string }[]
   >([]);
   const [eventType, setEventType] = useState<EventType>(null);
-  const [addingTask, setAddingTask] = useState<tasksDataType | null>(null);
+  const [tempTaskState, setTempTaskState] = useState<tasksDataType | null>(
+    null
+  );
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [tasksLoading, setTasksLoading] = useState<boolean>(true);
@@ -134,15 +133,19 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
+    setTimeout(() => {
+      setAuthLoading(false);
+    }, 2000);
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popupRef.current && popupRef.current.contains(event.target as Node)) {
         return;
       }
 
-      // setFormPopUp(null);
       setOptPopUp(false);
       setOptionType(null);
-      setEditingTask(null);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -287,72 +290,57 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const dbRef = ref(db, `/main/${user?.providerData[0].uid}/tasks`);
-      const logRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/logs`);
+
       const snapshot = await get(dbRef);
       const existingData = snapshot.val() || {}; // Fetch existing tasks (default to an empty object)
 
-      if (editingTask) {
+      setFormPopUp(null);
+      if (tempTaskState?.id) {
         // Update existing task
         const updatedData = {
           ...existingData,
-          [editingTask.id]: newTask,
+          [tempTaskState.id]: newTask,
         };
 
-        setEditingTask(null);
+        setTempTaskState(null);
 
         await update(dbRef, updatedData);
 
-        // Add log entry
-        const newLogEntry = {
-          activity: `You edited ${editingTask.title} details`,
-          timeStamp: formatTimeStamp(new Date().toISOString()),
-        };
-
-        await push(logRef, newLogEntry); // Add log to Firebase logs array
-
-        setEventLog((pre) => [...pre, newLogEntry]);
-        toast.success("Task edited successfully");
+        handleLogEntry("edit", tempTaskState.title);
       } else {
-        // Convert the object to an array if it exists
-        const cleanExistingData = Object.keys(existingData).map((key) => ({
-          id: key,
-          ...existingData[key],
-        }));
-
         // Create a new task object with a unique ID
         const newTaskWithId = { ...newTask, id: Date.now().toString() };
 
-        // Add the new task to the cleaned data
-        const updatedData = [...cleanExistingData, newTaskWithId];
-
-        // Convert the updated data back to an object for Firebase
-        const dataToSave = updatedData.reduce((acc, task) => {
-          acc[task.id] = task;
-          return acc;
-        }, {});
+        // Add the new task to the existingData
+        const updatedData = {
+          ...existingData,
+          [newTaskWithId.id]: newTaskWithId,
+        };
 
         // Save the updated tasks back to Firebase
         await update(ref(db, `/main/${user?.providerData[0].uid}`), {
-          tasks: dataToSave,
+          tasks: updatedData,
         });
 
-        // Add log entry
-        const newLogEntry = {
-          activity: `You created ${newTask.title} task`,
-          timeStamp: formatTimeStamp(new Date().toISOString()),
-        };
-
-        await push(logRef, newLogEntry); // Add log to Firebase logs array
-
-        setEventLog((pre) => [...pre, newLogEntry]);
-        toast.success("Task Added Successfully");
+        handleLogEntry("add", newTask.title);
       }
-
-      // Clear the popup and show success message
-      setFormPopUp(null);
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
     }
+  };
+
+  const handleLogEntry = async (event: string, title: string) => {
+    const logRef = ref(db, `/main/${user?.providerData[0].uid}/tasks/logs`);
+    // Add log entry
+    const newLogEntry = {
+      activity: `You ${event}ed ${title} details`,
+      timeStamp: formatTimeStamp(new Date().toISOString()),
+    };
+
+    await push(logRef, newLogEntry); // Add log to Firebase logs array
+
+    setEventLog((pre) => [...pre, newLogEntry]);
+    toast.success(`Task ${event}ed successfully`);
   };
 
   const handleUpdateStatus = async (newStatus: string, taskId?: string) => {
@@ -447,7 +435,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleFindTask = (taskId: string, newStatus?: string) => {
     const task = taskData.find((item: tasksDataType) => item.id === taskId);
     if (task) {
-      setEditingTask(task);
+      setTempTaskState(task);
     }
     if (newStatus) {
       handleUpdateStatus(newStatus);
@@ -552,7 +540,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleAddTask = (key: string, value: string) => {
-    setAddingTask((prevTask) => {
+    setTempTaskState((prevTask) => {
       // Ensure the state always returns a valid tasksDataType object
       const updatedTask = {
         ...(prevTask || { id: "", status: "" }), // Provide defaults if prevTask is null
@@ -589,8 +577,6 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setSearchItem,
         categoryItem,
         setCategoryItem,
-        editingTask,
-        setEditingTask,
         handleFindTask,
         sortDates,
         eventLog,
@@ -604,8 +590,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
         handleUpdateStatus,
         eventType,
         setEventType,
-        addingTask,
-        setAddingTask,
+        tempTaskState,
+        setTempTaskState,
         handleAddTask,
         dateValueAdd,
         onChangeDateAdd,

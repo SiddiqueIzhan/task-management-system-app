@@ -123,7 +123,8 @@ const FormSection = ({
               <RiListOrdered2 />
               <RiListUnordered />
             </div>
-            <span>0/300 characters</span>
+
+            <span>{values.description.length}/300 characters</span>
           </div>
         </div>
       </div>

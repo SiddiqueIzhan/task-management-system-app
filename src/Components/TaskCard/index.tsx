@@ -1,6 +1,6 @@
 import React from "react";
 import OptionsPopUp from "../OptionPopUp/optionsPopUp";
-import { listColumns, statusOptions, taskOptions } from "../data";
+import { listColumns, taskOptions } from "../data";
 import { SlOptions } from "react-icons/sl";
 import styles from "../CardContainer/CardContainer.module.scss";
 import { useAppContext } from "../../Context/appContext";
@@ -47,14 +47,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
     borderRadius: isDragging && listView ? "8px" : "",
     boxShadow: isDragging ? "0px 4px 4px 0px #0000001a" : "none",
     zIndex: isDragging ? 2 : 0,
-  };
-
-  const getStyleClass = (cardItem: cardItemType) => {
-    if (cardItem.status === "TO-DO") return "w-[66.53px]";
-    else if (cardItem.status === "IN-PROGRESS") return "w-[115.31px]";
-    else if (cardItem.status === "COMPLETED") {
-      return "w-[105.38px]";
-    }
   };
 
   return (
@@ -115,29 +107,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, item, cardItem }) => {
             event={eventType}
           />
         )}
-      {listView && (
-        <>
-          <div
-            className={`${getStyleClass(
-              cardItem
-            )} h-7 rounded-sm absolute top-2.5 left-1/2 xl:translate-x-12 z-10 hidden md:inline lg:translate-x-32`}
-            onClick={() => {
-              setEventType("edit");
-              handleShowOptions(id, "status");
-            }}
-          ></div>
-          {isOptPopUp &&
-            id === activeIndex &&
-            optionType === "status" &&
-            eventType === "edit" && (
-              <OptionsPopUp
-                options={statusOptions}
-                className="absolute top-12 left-1/2 translate-x-12 py-3 px-[14px] gap-3 z-50"
-                event={eventType}
-              />
-            )}
-        </>
-      )}
     </div>
   );
 };

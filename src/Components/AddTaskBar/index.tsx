@@ -23,8 +23,8 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
     optionType,
     eventType,
     setEventType,
-    addingTask,
-    setAddingTask,
+    tempTaskState,
+    setTempTaskState,
     dateValueAdd,
     onChangeDateAdd,
     handleAddTask,
@@ -39,7 +39,7 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
 
   useEffect(() => {
     setOptPopUp(false);
-  }, [addingTask]);
+  }, [tempTaskState]);
   return (
     <>
       {cardItem.status === "TO-DO" && listView && (
@@ -64,7 +64,7 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                       type="text"
                       placeholder="Task Title"
                       className="bg-transparent"
-                      value={addingTask?.title}
+                      value={tempTaskState?.title}
                       onChange={(e) => handleAddTask("title", e.target.value)}
                     />
                   </span>
@@ -92,10 +92,10 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                       handleShowOptions("1", "status");
                     }}
                     className={`${styles.add} ${
-                      addingTask?.status && styles.added
+                      tempTaskState?.status && styles.added
                     }`}
                   >
-                    {addingTask?.status ? addingTask?.status : <IoMdAdd />}
+                    {tempTaskState?.status ? tempTaskState?.status : <IoMdAdd />}
                   </span>
                   {isOptPopUp &&
                     optionType === "status" &&
@@ -114,10 +114,10 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                       handleShowOptions("2", "category");
                     }}
                     className={`${styles.add} ${
-                      addingTask?.category && styles.added
+                      tempTaskState?.category && styles.added
                     }`}
                   >
-                    {addingTask?.category ? addingTask?.category : <IoMdAdd />}
+                    {tempTaskState?.category ? tempTaskState?.category : <IoMdAdd />}
                   </span>
                   {isOptPopUp &&
                     optionType === "category" &&
@@ -134,8 +134,8 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                     <span
                       className="w-[84px] px-3 py-1 rounded-[60px] bg-[#7B1984] text-white text-center font-bold flex items-center gap-2"
                       onClick={() => {
-                        addingTask && handleAddUpdateTask(addingTask);
-                        setAddingTask(null); // reset adding task
+                        tempTaskState && handleAddUpdateTask(tempTaskState);
+                        setTempTaskState(null); // reset adding task
                         onChangeDateAdd(null);
                         setShowAddTaskbar(false);
                       }}
@@ -147,8 +147,7 @@ const AddTaskBar = ({ cardItem }: addTaskBarProps) => {
                       className="w-[84px] px-3 py-1 rounded-[60px] bg-transparent text-black text-center font-bold"
                       onClick={() => {
                         onChangeDateAdd(null);
-                        setAddingTask(null); // reset adding task
-                        setAddingTask(null);
+                        setTempTaskState(null); // reset adding task
                         setShowAddTaskbar(false);
                       }}
                     >
